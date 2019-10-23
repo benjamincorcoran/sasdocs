@@ -1,1 +1,0 @@
-data test otherlib.test oth&erte.st;

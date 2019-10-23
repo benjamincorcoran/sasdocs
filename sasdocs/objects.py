@@ -91,5 +91,4 @@ proc = ps.seq(
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
 
-test = "proc summary data=lib2.test(where=(ax=b) rename=(a=b)); by x; output out=lib3.test2; run;"
-print(proc.parse(test))
+
