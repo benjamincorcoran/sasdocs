@@ -65,3 +65,27 @@ testcases = [
 @pytest.mark.parametrize("case,expected", testcases)
 def test_procedure_parse(case, expected):
     assert proc.parse(case) == expected
+
+testcases = [
+    ('libname test "helloeastset";', libname(library=['test'], path='helloeastset', pointer=None)),
+    ("libname test 'hellotest';", libname(library=['test'], path="hellotest", pointer=None)),
+    (r'libname test "\\network\drive";', libname(library=['test'], path=r'\\network\drive', pointer=None)),
+    (r"libname test 'S:\mappeddrive';", libname(library=['test'], path=r"S:\mappeddrive", pointer=None)),
+    ('libname test (work);', libname(library=['test'], path=None, pointer=['work']))
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_libname_parse(case, expected):
+    assert lbnm.parse(case) == expected
+
+
+testcases = [
+    (r'%include "\\network\drive\prg.sas";', include(path=r'\\network\drive\prg.sas')),
+    (r"%include 'S:\mappeddrive\prg.sas';", include(path=r"S:\mappeddrive\prg.sas")),
+    (r'%include "\\network\drive";', include(path=r'\\network\drive')),
+    (r"%include 'S:\mappeddrive';", include(path=r"S:\mappeddrive"))
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_include_parse(case, expected):
+    assert icld.parse(case) == expected

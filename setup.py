@@ -12,7 +12,8 @@ DESCRIPTION = 'A tool for analysising and documenting SAS code.'
 LONG_DESCRIPTION = readme()
 AUTHOR = 'Ben Corcoran'
 
-INSTALL_REQUIRES = []
+with open('requirements.txt') as f:
+    INSTALL_REQUIRES = f.read().splitlines()
 
 
 setup(name=NAME,

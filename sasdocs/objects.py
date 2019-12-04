@@ -27,11 +27,23 @@ class procedure:
     outputs = attr.ib()
     inputs = attr.ib()
     type = attr.ib()
+    
+@attr.s 
+class libname:
+    library = attr.ib()
+    path = attr.ib()
+    pointer = attr.ib(default=None)
+
+@attr.s 
+class include:
+    path = attr.ib()
+
 
 # Parsy Objects
 
 # Basic Objects
 wrd = ps.regex(r'[a-zA-Z0-9_-]+')
+fpth = ps.regex(r'[^\'"]+')
 
 spc = ps.regex(r'\s+')
 opspc = ps.regex(r'\s*')
@@ -44,6 +56,8 @@ col = ps.string(';')
 amp = ps.string('&')
 lb = ps.string('(')
 rb = ps.string(')')
+
+qte = ps.string('"') | ps.string("'")
 
 
 run = ps.regex('run',flags=re.IGNORECASE)
@@ -91,4 +105,13 @@ proc = ps.seq(
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
 
+lbnm = ps.seq(
+    library = (ps.regex(r'libname', flags=re.IGNORECASE) + spc) >> sasName << spc,
+    path = (opspc + qte >> fpth << opspc + qte + col).optional(),
+    pointer = (opspc + lb + opspc >> sasName << opspc + rb + opspc + col).optional()
+).combine_dict(libname)
+
+icld = ps.seq(
+    path = (ps.regex(r'%include', flags=re.IGNORECASE) + spc + opspc + qte) >> fpth << (qte + opspc + col),
+).combine_dict(include)
 
