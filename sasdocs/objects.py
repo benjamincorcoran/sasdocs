@@ -41,6 +41,8 @@ class include:
 
 # Parsy Objects
 
+reFlags = re.IGNORECASE|re.DOTALL
+
 # Basic Objects
 wrd = ps.regex(r'[a-zA-Z0-9_-]+')
 fpth = ps.regex(r'[^\'"]+')
@@ -51,6 +53,7 @@ opspc = ps.regex(r'\s*')
 dot = ps.string('.')
 opdot = ps.string('.').optional().map(lambda x: '' if x is None else x)
 
+nl = ps.string('\n')
 eq = ps.string('=')
 col = ps.string(';')
 amp = ps.string('&')
@@ -63,9 +66,9 @@ qte = ps.string('"') | ps.string("'")
 run = ps.regex('run',flags=re.IGNORECASE)
 qt = ps.regex('quit',flags=re.IGNORECASE)
 
+
 # Basic SAS Objects
 mcv = (amp + wrd + opdot).map(macroVariable)
-
 
 # Complex SAS Objects
 sasName = (wrd|mcv).many()
@@ -89,19 +92,19 @@ dataLine = dataObj.sep_by(spc)
 
 datastep = ps.seq(
     outputs = (ps.regex('data', flags=re.IGNORECASE) + spc) >> dataLine << col,
-    header = ps.regex('.*?(?=set|merge)', flags=re.IGNORECASE),
+    header = ps.regex('.*?(?=set|merge)', flags=reFlags),
     inputs = (opspc + ps.regex('set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col,
-    body = ps.regex('.*?(?=run)', flags=re.IGNORECASE),
+    body = ps.regex('.*?(?=run)', flags=reFlags),
     _run = run + opspc + col
 ).combine_dict(dataStep)
 
 proc = ps.seq(
     type = (ps.regex('proc', flags=re.IGNORECASE) + spc) >> wrd << spc,
-    _h1 = ps.regex('.*?(?=data)', flags=re.IGNORECASE),
-    inputs = (ps.regex('data', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataLine,
-    _h2 = ps.regex('.*?(?=out\s*=)', flags=re.IGNORECASE).optional(),
-    outputs = ((ps.regex('out', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataLine).optional(),
-    _h3 = ps.regex('.*?(?=run|quit)', flags=re.IGNORECASE),
+    _h1 = ps.regex('.*?(?=data)', flags=reFlags),
+    inputs = (ps.regex('data', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataObj,
+    _h2 = ps.regex('.*?(?=out\s*=)', flags=reFlags).optional(),
+    outputs = ((ps.regex('out', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataObj).optional(),
+    _h3 = ps.regex('.*?(?=run|quit)', flags=reFlags),
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
 
@@ -115,3 +118,5 @@ icld = ps.seq(
     path = (ps.regex(r'%include', flags=re.IGNORECASE) + spc + opspc + qte) >> fpth << (qte + opspc + col),
 ).combine_dict(include)
 
+
+noMacroSAS = (nl|datastep|proc|lbnm|icld).many()
