@@ -197,3 +197,23 @@ icld = ps.seq(
 
 
 program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
+
+
+def force_partial_parse(parser, string):
+    """Force partial parse of string skipping unparsable characters
+    
+    Parameters:
+    parser (parsy.parser): parsy valid parsing object
+    string (str): String to be parsed
+
+    Returns:
+    list: parsed objects from string"""
+    parsed = []
+    while len(string) > 0:
+        partialParse, string = parser.parse_partial(string)
+        if len(partialParse) == 0:
+            string = string[1:]
+        else:
+            parsed += partialParse
+    
+    return parsed

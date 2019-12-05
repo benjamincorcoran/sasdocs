@@ -1,6 +1,6 @@
 import pytest
 import pprint
-from sasdocs.objects import datastep, program
+from sasdocs.objects import program, force_partial_parse
 
 sasCode = """
 libname a "path/to/folder";
@@ -20,18 +20,7 @@ proc transpose data=a.data3 out=a.data4;
     by a;
 run;
 """
-remain = sasCode;
-
-parsed = []
-while len(remain) > 0:
-    partialParse, remain = program.parse_partial(remain)
-    if len(partialParse) == 0:
-        remain = remain[1:]
-        print(remain)
-    else:
-        parsed += partialParse
-
-
+parsed = force_partial_parse(program, sasCode)
 parsed1 = [item for item in parsed if item != '\n']
 print(parsed)
 pprint.pprint(parsed1)
