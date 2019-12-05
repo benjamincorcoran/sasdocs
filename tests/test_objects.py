@@ -89,3 +89,15 @@ testcases = [
 @pytest.mark.parametrize("case,expected", testcases)
 def test_include_parse(case, expected):
     assert icld.parse(case) == expected
+
+
+testcases = [
+    ('%let a = 1;', macroVariableDefinition(variable=['a'],value=' 1')),
+    ('%let a=1;', macroVariableDefinition(variable=['a'],value='1')),
+    ('%let a =1;', macroVariableDefinition(variable=['a'],value='1')),
+    ('%let a = ;', macroVariableDefinition(variable=['a'],value=' ')),
+    ('%let a =;', macroVariableDefinition(variable=['a'],value=None)),
+]
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macroVariableDefinition_parse(case, expected):
+    assert mcvDef.parse(case) == expected
