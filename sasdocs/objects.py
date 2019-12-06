@@ -244,8 +244,8 @@ class macro:
     body = attr.ib()
 
     def __attrs_post_init__(self):
-        if isinstance(self.body,str):
-            self.body = force_partial_parse(program,self.body)
+        if isinstance(self.body, str):
+            self.body = force_partial_parse(program, self.body)
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
