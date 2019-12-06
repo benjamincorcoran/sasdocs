@@ -199,7 +199,7 @@ icld = ps.seq(
 program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 
-def force_partial_parse(parser, string):
+def force_partial_parse(parser, string, **kwargs):
     """Force partial parse of string skipping unparsable characters
     
     Parameters:
@@ -209,11 +209,15 @@ def force_partial_parse(parser, string):
     Returns:
     list: parsed objects from string"""
     parsed = []
+    olen = len(string)
+    skips = 0
     while len(string) > 0:
         partialParse, string = parser.parse_partial(string)
         if len(partialParse) == 0:
             string = string[1:]
+            skips += 1
         else:
             parsed += partialParse
     
+    # print("Parsed: {:.2%}".format(1-(skips/olen)))
     return parsed
