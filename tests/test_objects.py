@@ -90,6 +90,15 @@ testcases = [
 def test_include_parse(case, expected):
     assert icld.parse(case) == expected
 
+testcases = [
+    (r'*Comment;', comment(text=r'Comment')),
+    (r"/*Comment*/", comment(text=r"Comment"))
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_include_parse(case, expected):
+    assert cmnt.parse(case) == expected
+
 
 testcases = [
     ('%let a = 1;', macroVariableDefinition(variable=['a'],value=' 1')),
@@ -224,3 +233,5 @@ procedure(outputs=dataObject(library=['a'], dataset=['data4'], options=None), in
 def test_force_partial_marco_parse(case, expected):
     res = force_partial_parse(fullprogram, case)
     assert res == expected
+
+
