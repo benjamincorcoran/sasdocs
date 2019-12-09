@@ -5,6 +5,7 @@ testcases = [
     ("test", ["test"]),
     ("&test", [macroVariable(variable="&test")]),
     ("&test.", [macroVariable(variable="&test.")]),
+    ("&&test.", [macroVariable(macroVariable(variable="&test."))]),
     ("ab&test", ['ab',macroVariable(variable="&test")]),
     ("ab&test.", ['ab', macroVariable(variable='&test.')]),
     ("ab&test.ab", ['ab', macroVariable(variable='&test.'), 'ab']),
@@ -140,11 +141,11 @@ def test_macroargumentLine_parse(case, expected):
     assert mcroargline.parse(case) == expected
 
 testcases = [
-    ('%macro test; %mend;', macro(name=['test'], arguments=None, body=' ')),
-    ('%macro test(a, b, c); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], body=' ')),
-    ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], body=' ')),
-    ('%macro test; data a; set b; run; %mend;', macro(name=['test'], arguments=None, body=' data a; set b; run; ')),
-    ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], body=' data a; set b; run; ')),
+    ('%macro test; %mend;', macro(name=['test'], arguments=None, contents=' ')),
+    ('%macro test(a, b, c); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents=' ')),
+    ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents=' ')),
+    ('%macro test; data a; set b; run; %mend;', macro(name=['test'], arguments=None, contents=' data a; set b; run; ')),
+    ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents=' data a; set b; run; ')),
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
@@ -158,7 +159,7 @@ testcases = [
 
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macro_children_parse(case, expected):
-    assert mcro.parse(case).body == expected
+    assert mcro.parse(case).contents == expected
 
 
 testcases = [("""
@@ -220,7 +221,7 @@ run;
 libname(library=['a'], path='path/to/folder', pointer=None),
 macroVariableDefinition(variable=['a'], value=' 1'),
 dataStep(outputs=[dataObject(library=['a'], dataset=['data2'], options=None)], header='\n    ', inputs=[dataObject(library=['a'], dataset=['data1'], options=None)], body='\n'),
-macro(name=['test'], arguments=None, body=[
+macro(name=['test'], arguments=None, contents=[
     comment(text='inline comment'),
     comment(text='inline comment'),
     comment(text='Comment'),

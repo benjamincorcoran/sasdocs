@@ -1,8 +1,12 @@
 import os
+import pathlib
 import logging
 import attr
 import re
 import parsy as ps
+
+log = logging.getLogger(__name__) 
+
 
 def force_partial_parse(parser, string, **kwargs):
     """Force partial parse of string skipping unparsable characters
@@ -42,7 +46,61 @@ def force_partial_parse(parser, string, **kwargs):
 #     - libname
 #     - include
 
+@attr.s
+class macroVariable:
+    variable = attr.ib()
 
+@attr.s
+class comment:
+    text = attr.ib()
+
+@attr.s
+class macroVariableDefinition:
+    variable = attr.ib()
+    value = attr.ib()
+
+@attr.s 
+class include:
+    path = attr.ib()
+    @path.validator
+    def check_path_is_valid(self, attribute, value):
+        try:
+            self.path = pathlib.Path(value).resolve()
+        except Exception as e:
+            log.error("Unable to resolve path: {}".format(e))
+
+@attr.s
+class dataObject:
+    library = attr.ib()
+    dataset = attr.ib()
+    options = attr.ib(default=None)
+
+@attr.s
+class dataStep:
+    outputs = attr.ib()
+    header = attr.ib()
+    inputs = attr.ib()
+    body = attr.ib()
+
+@attr.s
+class procedure:
+    outputs = attr.ib()
+    inputs = attr.ib()
+    type = attr.ib()
+    
+@attr.s 
+class libname:
+    library = attr.ib()
+    path = attr.ib()
+    pointer = attr.ib(default=None)
+    @path.validator
+    def check_path_is_valid(self, attribute, value):
+        try:
+            self.path = pathlib.Path(value).resolve()
+        except Exception as e:
+            log.error("Unable to resolve path: {}".format(e))
+
+ 
 # Parsy Objects
 # Define reFlags as ignorecase and dotall to capture new lines
 reFlags = re.IGNORECASE|re.DOTALL
@@ -89,15 +147,8 @@ qt = ps.regex(r'quit',flags=re.IGNORECASE)
 # Basic SAS Objects
 
 # Macrovariable: ampersand + word + optional dot
-@attr.s
-class macroVariable:
-    variable = attr.ib()
-
-mcv = (amp + wrd + opdot).map(macroVariable)
-
-@attr.s
-class comment:
-    text = attr.ib()
+_mcv = (amp + wrd + opdot) 
+mcv = (_mcv | amp + _mcv + _mcv).map(macroVariable)
 
 # Inline comment: start + commentry + semicolon
 inlinecmnt = star >> ps.regex(r'[^;]+') << col
@@ -112,11 +163,6 @@ cmnt = (inlinecmnt|multicmnt).map(comment)
 sasName = (wrd|mcv).many()
 
 # Marcovariable definition:
-@attr.s
-class macroVariableDefinition:
-    variable = attr.ib()
-    value = attr.ib()
-
 mcvDef = ps.seq(
     variable =ps.regex(r'%let',flags=reFlags) + spc + opspc >> sasName << opspc + eq,
     value = ps.regex(r'[^;]+', flags=reFlags).optional(),
@@ -140,12 +186,6 @@ datalineOptions = ps.seq(
 #   - dataset: sasName after . or just sasName required
 #   - options: dataLineOptions is present
 
-@attr.s
-class dataObject:
-    library = attr.ib()
-    dataset = attr.ib()
-    options = attr.ib(default=None)
-
 dataObj = ps.seq(
     library = (sasName << dot).optional(),
     dataset = dot >> sasName | sasName,
@@ -162,13 +202,6 @@ dataLine = dataObj.sep_by(spc)
 #   - body: anything between inputs and "run"
 # terminating run is thrown away
 
-@attr.s
-class dataStep:
-    outputs = attr.ib()
-    header = attr.ib()
-    inputs = attr.ib()
-    body = attr.ib()
-
 datastep = ps.seq(
     outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine << col,
     header = ps.regex(r'.*?(?=set|merge)', flags=reFlags),
@@ -182,12 +215,6 @@ datastep = ps.seq(
 #   - inputs: capture single dataObj after "data="
 #   - outputs: capture single dataObj after "out="
 # throw away an other excess
-@attr.s
-class procedure:
-    outputs = attr.ib()
-    inputs = attr.ib()
-    type = attr.ib()
-    
 
 proc = ps.seq(
     type = (ps.regex(r'proc', flags=re.IGNORECASE) + spc) >> wrd << spc,
@@ -204,13 +231,6 @@ proc = ps.seq(
 #   - path: filepath of the library if given 
 #   - pointer: name of library reference pointed to if given
 
-@attr.s 
-class libname:
-    library = attr.ib()
-    path = attr.ib()
-    pointer = attr.ib(default=None)
-
-
 lbnm = ps.seq(
     library = (ps.regex(r'libname', flags=re.IGNORECASE) + spc) >> sasName << spc,
     path = (opspc + qte >> fpth << opspc + qte + col).optional(),
@@ -219,10 +239,6 @@ lbnm = ps.seq(
 
 # icld: Abstracted include statement, one component:
 #   - path: file path to the included code 
-@attr.s 
-class include:
-    path = attr.ib()
-
 icld = ps.seq(
     path = (ps.regex(r'%include', flags=re.IGNORECASE) + spc + opspc + qte) >> fpth << (qte + opspc + col),
 ).combine_dict(include)
@@ -241,11 +257,11 @@ class macroargument:
 class macro:
     name = attr.ib()
     arguments = attr.ib()
-    body = attr.ib()
+    contents = attr.ib()
 
     def __attrs_post_init__(self):
-        if isinstance(self.body, str):
-            self.body = force_partial_parse(program, self.body)
+        if isinstance(self.contents, str):
+            self.contents = force_partial_parse(program, self.contents)
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
@@ -258,7 +274,7 @@ mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
 mcro = ps.seq(
     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
     arguments = (opspc >> mcroargline).optional(),
-    body = opspc + col >> ps.regex(r'.*?(?=%mend)',flags=reFlags) << ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col
+    contents = opspc + col >> ps.regex(r'.*?(?=%mend)',flags=reFlags) << ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col
 ).combine_dict(macro)
 
 # fullprogram: multiple SAS objects including macros
