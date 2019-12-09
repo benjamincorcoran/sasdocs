@@ -8,7 +8,7 @@ import parsy as ps
 log = logging.getLogger(__name__) 
 
 
-def force_partial_parse(parser, string, **kwargs):
+def force_partial_parse(parser, string, stats=False):
     """Force partial parse of string skipping unparsable characters
     
     Parameters:
@@ -30,7 +30,10 @@ def force_partial_parse(parser, string, **kwargs):
                 parsed += partialParse
         
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
-        return [p for p in parsed if p != '\n']
+        if stats:
+            return ([p for p in parsed if p != '\n'], (1-skips/olen))
+        else:
+            return [p for p in parsed if p != '\n']
     else:
         return []
 

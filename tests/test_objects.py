@@ -5,7 +5,7 @@ testcases = [
     ("test", ["test"]),
     ("&test", [macroVariable(variable="&test")]),
     ("&test.", [macroVariable(variable="&test.")]),
-    ("&&test.", [macroVariable(macroVariable(variable="&test."))]),
+    ("&&test&test.", [macroVariable(variable="&&test&test.")]),
     ("ab&test", ['ab',macroVariable(variable="&test")]),
     ("ab&test.", ['ab', macroVariable(variable='&test.')]),
     ("ab&test.ab", ['ab', macroVariable(variable='&test.'), 'ab']),

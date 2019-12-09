@@ -13,6 +13,13 @@ log = logging.getLogger(__name__)
 class sasProgram(object):
 
     def __init__(self, path):
+
+        if self.load_file(path) is None:
+            return None
+        
+        self.get_extended_info()
+
+    def load_file(self, path):
         try:
             self.path = pathlib.Path(path).resolve()
         except Exception as e:
@@ -24,13 +31,15 @@ class sasProgram(object):
                 self.raw = f.read()
         except Exception as e:
             log.error("Unable to read file: {}".format(e))
+            return None
 
         try:
-            self.contents = force_partial_parse(fullprogram, self.raw)
+            self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True)
         except Exception as e:
             log.error("Unable to parse file: {}".format(e))
+            return None
         
-        self.get_extended_info()
+        return 1
 
     def get_extended_info(self):
         self.extendedInfo = {}
@@ -39,6 +48,7 @@ class sasProgram(object):
         self.extendedInfo['lines'] = self.raw.count('\n')
         self.extendedInfo['lastEdit'] = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
         self.extendedInfo['summary'] = dict(Counter(type(obj).__name__ for obj in self.contents))
+        self.extendedInfo['parsed'] = "{:.2%}".format(self.parsedRate)
 
 
 
