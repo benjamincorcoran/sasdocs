@@ -72,18 +72,31 @@ class include:
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
 
-@attr.s
+@attr.s(repr=False)
 class dataObject:
     library = attr.ib()
     dataset = attr.ib()
-    options = attr.ib(default=None)
+    options = attr.ib(default=None, repr=False)
+
+    def __attrs_post_init__(self):
+        if self.library is None:
+            self.library = 'work'
+        
+        self.UID = (''.join(self.library) + '.' + ''.join(self.dataset)).upper()
+        self.name = ''.join(self.library) + '.' + ''.join(self.dataset)
+    
+    def __repr__(self):
+        return self.name
+    def __str__(self):
+        return self.name
+
 
 @attr.s
 class dataStep:
     outputs = attr.ib()
-    header = attr.ib()
+    header = attr.ib(repr=False)
     inputs = attr.ib()
-    body = attr.ib()
+    body = attr.ib(repr=False)
 
 @attr.s
 class procedure:

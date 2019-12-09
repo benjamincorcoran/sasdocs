@@ -10,3 +10,4 @@ def test_simple_program(case, expected):
     res = sasProgram(case)
 
 pprint.pprint(sasProgram(testcases[0][0]).extendedInfo)
+pprint.pprint(sasProgram(testcases[0][0]).contents)
