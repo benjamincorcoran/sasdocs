@@ -82,6 +82,7 @@ def force_partial_parse(parser, string, stats=False):
 class macroVariable:
     variable = attr.ib()
 
+
 @attr.s
 class comment:
     text = attr.ib()
@@ -111,14 +112,24 @@ class dataObject:
         if self.library is None:
             self.library = 'work'
         
-        self.UID = (''.join(self.library) + '.' + ''.join(self.dataset)).upper()
-        self.name = ''.join(self.library) + '.' + ''.join(self.dataset)
+        if type(self.library) == list:
+            _lib = ''.join([s if type(s) != macroVariable else s.variable for s in self.library])
+        else:
+            _lib = self.library
+        
+        if type(self.dataset) == list:
+            _ds = ''.join([s if type(s) != macroVariable else s.variable for s in self.dataset])
+        else:
+            _ds = self.dataset
+            
+        self.name = (_lib + '.' + _ds)
+        self.UID =  self.name.upper()
+        
     
     def __repr__(self):
         return self.name
     def __str__(self):
         return self.name
-
 
 @attr.s
 class dataStep:
