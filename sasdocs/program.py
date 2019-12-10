@@ -5,7 +5,7 @@ import pathlib
 
 from collections import Counter
 
-from .objects import fullprogram, force_partial_parse, procedure
+from .objects import fullprogram, force_partial_parse, procedure, macro
 
 log = logging.getLogger(__name__) 
 
@@ -17,7 +17,6 @@ class sasProgram(object):
         if self.load_file(path) is None:
             return None
         
-        self.get_extended_info()
 
     def load_file(self, path):
         try:
@@ -35,11 +34,11 @@ class sasProgram(object):
 
         try:
             self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True)
+            self.get_extended_info()
         except Exception as e:
             log.error("Unable to parse file: {}".format(e))
             return None
-        
-        return 1
+    
 
     def get_extended_info(self):
         self.extendedInfo = {}

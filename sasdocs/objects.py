@@ -8,6 +8,33 @@ import parsy as ps
 log = logging.getLogger(__name__) 
 
 
+def rebuild_macros(objs, i=0):
+    '''
+    Recursively generate macro objects from macroStart & macroEnd objects in 
+    processed list
+
+    Parameters:
+    objs (list): list of sas objects
+    i (int): recursive safe loop variable
+
+    Returns:
+    list: parsed objects from string
+    '''
+    output = []
+    while i < len(objs):
+        obj = objs[i]
+        if type(obj) == macroEnd:
+            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+        elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
+            output.append(obj)
+        else:
+            _, i = rebuild_macros(objs,i=i)
+            output.append(_)
+        i+=1
+    
+    return output, i
+
+
 def force_partial_parse(parser, string, stats=False):
     """Force partial parse of string skipping unparsable characters
     
@@ -17,6 +44,7 @@ def force_partial_parse(parser, string, stats=False):
 
     Returns:
     list: parsed objects from string"""
+    print(string)
     if isinstance(string, str):
         parsed = []
         olen = len(string)
@@ -30,6 +58,7 @@ def force_partial_parse(parser, string, stats=False):
                 parsed += partialParse
         
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
+        parsed = rebuild_macros(parsed)
         if stats:
             return ([p for p in parsed if p != '\n'], (1-skips/olen))
         else:
@@ -76,7 +105,7 @@ class include:
 class dataObject:
     library = attr.ib()
     dataset = attr.ib()
-    options = attr.ib(default=None, repr=False)
+    options = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         if self.library is None:
@@ -112,7 +141,8 @@ class libname:
     @path.validator
     def check_path_is_valid(self, attribute, value):
         try:
-            self.path = pathlib.Path(value).resolve()
+            if self.path is not None:
+                self.path = pathlib.Path(value).resolve()
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
 
@@ -147,6 +177,8 @@ lb = ps.string('(')
 rb = ps.string(')')
 star = ps.string('*')
 cmm = ps.string(',')
+
+anycharacter = ps.regex(r'.', flags=reFlags)
 
 # Multiline comment entry and exit points
 comstart = ps.string(r'/*')
@@ -276,8 +308,7 @@ class macro:
     contents = attr.ib()
 
     def __attrs_post_init__(self):
-        if isinstance(self.contents, str):
-            self.contents = force_partial_parse(program, self.contents)
+        self.contents = [obj for obj in self.contents if obj != '\n']
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
@@ -287,12 +318,32 @@ mcroarg = ps.seq(
 
 mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
 
-mcro = ps.seq(
+
+# mcro = ps.seq(
+#     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
+#     arguments = (opspc >> mcroargline).optional(),
+#     contents = opspc + col >> recur << ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col
+# ).combine_dict(macro)
+
+@attr.s
+class macroStart:
+    name = attr.ib()
+    arguments = attr.ib()
+
+@attr.s
+class macroEnd:
+    text = attr.ib()
+
+
+mcroStart = ps.seq(
     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
-    arguments = (opspc >> mcroargline).optional(),
-    contents = opspc + col >> ps.regex(r'.*?(?=%mend)',flags=reFlags) << ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col
-).combine_dict(macro)
+    arguments = (opspc >> mcroargline).optional() << opspc + col 
+).combine_dict(macroStart)
+
+mcroEnd = (ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col).map(macroEnd)
 
 # fullprogram: multiple SAS objects including macros
-fullprogram = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld|mcro).many()
+fullprogram =  (nl|mcvDef|cmnt|datastep|proc|lbnm|icld|mcroStart|mcroEnd).many()
+
+
 
