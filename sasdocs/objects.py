@@ -58,11 +58,15 @@ def force_partial_parse(parser, string, stats=False):
                 parsed += partialParse
         
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
-        parsed = rebuild_macros(parsed)
-        if stats:
-            return ([p for p in parsed if p != '\n'], (1-skips/olen))
+        parsed = rebuild_macros(parsed)[0]
+        if type(parsed) == list:
+            ret = [p for p in parsed if p != '\n']
         else:
-            return [p for p in parsed if p != '\n']
+            ret = [parsed]
+        if stats:
+            return (ret, (1-skips/olen))
+        else:
+            return ret
     else:
         return []
 
@@ -121,11 +125,10 @@ class dataObject:
             _ds = ''.join([s if type(s) != macroVariable else s.variable for s in self.dataset])
         else:
             _ds = self.dataset
-            
+
         self.name = (_lib + '.' + _ds)
-        self.UID =  self.name.upper()
+        self.UID = self.name.upper()
         
-    
     def __repr__(self):
         return self.name
     def __str__(self):
@@ -134,9 +137,9 @@ class dataObject:
 @attr.s
 class dataStep:
     outputs = attr.ib()
-    header = attr.ib(repr=False)
     inputs = attr.ib()
-    body = attr.ib(repr=False)
+    header = attr.ib(repr=False, default=None)
+    body = attr.ib(repr=False, default=None)
 
 @attr.s
 class procedure:
@@ -328,13 +331,6 @@ mcroarg = ps.seq(
 ).combine_dict(macroargument)
 
 mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
-
-
-# mcro = ps.seq(
-#     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
-#     arguments = (opspc >> mcroargline).optional(),
-#     contents = opspc + col >> recur << ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col
-# ).combine_dict(macro)
 
 @attr.s
 class macroStart:
