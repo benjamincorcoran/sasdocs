@@ -44,7 +44,6 @@ def force_partial_parse(parser, string, stats=False):
 
     Returns:
     list: parsed objects from string"""
-    print(string)
     if isinstance(string, str):
         parsed = []
         olen = len(string)

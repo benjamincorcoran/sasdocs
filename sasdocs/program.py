@@ -38,7 +38,15 @@ class sasProgram(object):
         except Exception as e:
             log.error("Unable to parse file: {}".format(e))
             return None
-    
+        
+    def summarise_objects(self, object):
+        counter = Counter(type(obj).__name__ for obj in object.contents)
+
+        for obj in object.contents:
+            if type(obj).__name__ == 'macro':
+                counter += self.summarise_objects(obj)
+        return counter
+
 
     def get_extended_info(self):
         self.extendedInfo = {}
@@ -46,7 +54,7 @@ class sasProgram(object):
         self.extendedInfo['path'] = self.path
         self.extendedInfo['lines'] = self.raw.count('\n')
         self.extendedInfo['lastEdit'] = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
-        self.extendedInfo['summary'] = dict(Counter(type(obj).__name__ for obj in self.contents))
+        self.extendedInfo['summary'] = dict(self.summarise_objects(self))
         self.extendedInfo['parsed'] = "{:.2%}".format(self.parsedRate)
 
 

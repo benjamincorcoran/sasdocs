@@ -14,7 +14,4 @@ testcases = [
 def test_simple_program(case, expected):
     res = sasProgram(case)
 
-test= '''libname out (work);%macro outer;libname in1 (work);%macro inner;libname in2 (work);%mend;ddd%mend;libname end (work)'''
-
-test = force_partial_parse(fullprogram, test)
-print(test)
+pprint.pprint(sasProgram('./tests/samples/macro_1.sas').extendedInfo)
