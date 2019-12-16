@@ -14,4 +14,4 @@ testcases = [
 def test_simple_program(case, expected):
     res = sasProgram(case)
 
-pprint.pprint(sasProgram('./tests/samples/macro_1.sas').extendedInfo)
+pprint.pprint(sasProgram('./tests/samples/macro_2.sas').extendedInfo)

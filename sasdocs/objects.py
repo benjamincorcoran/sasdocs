@@ -159,7 +159,32 @@ class libname:
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
 
- 
+@attr.s
+class macroStart:
+    name = attr.ib()
+    arguments = attr.ib()
+
+@attr.s
+class macroEnd:
+    text = attr.ib()
+
+
+@attr.s
+class macroargument:
+    arg = attr.ib()
+    default = attr.ib()
+    doc = attr.ib()
+
+@attr.s
+class macro:
+    name = attr.ib()
+    arguments = attr.ib()
+    contents = attr.ib()
+
+    def __attrs_post_init__(self):
+        self.contents = [obj for obj in self.contents if obj != '\n']
+
+
 # Parsy Objects
 # Define reFlags as ignorecase and dotall to capture new lines
 reFlags = re.IGNORECASE|re.DOTALL
@@ -308,21 +333,6 @@ icld = ps.seq(
 program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 
-@attr.s
-class macroargument:
-    arg = attr.ib()
-    default = attr.ib()
-    doc = attr.ib()
-
-@attr.s
-class macro:
-    name = attr.ib()
-    arguments = attr.ib()
-    contents = attr.ib()
-
-    def __attrs_post_init__(self):
-        self.contents = [obj for obj in self.contents if obj != '\n']
-
 mcroarg = ps.seq(
     arg = sasName << opspc,
     default = (eq + opspc >> sasName).optional(),
@@ -331,14 +341,7 @@ mcroarg = ps.seq(
 
 mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
 
-@attr.s
-class macroStart:
-    name = attr.ib()
-    arguments = attr.ib()
 
-@attr.s
-class macroEnd:
-    text = attr.ib()
 
 
 mcroStart = ps.seq(

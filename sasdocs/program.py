@@ -41,7 +41,6 @@ class sasProgram(object):
         
     def summarise_objects(self, object):
         counter = Counter(type(obj).__name__ for obj in object.contents)
-
         for obj in object.contents:
             if type(obj).__name__ == 'macro':
                 counter += self.summarise_objects(obj)
@@ -49,13 +48,14 @@ class sasProgram(object):
 
 
     def get_extended_info(self):
-        self.extendedInfo = {}
-        self.extendedInfo['name'] = os.path.splitext(os.path.basename(self.path))[0]
-        self.extendedInfo['path'] = self.path
-        self.extendedInfo['lines'] = self.raw.count('\n')
-        self.extendedInfo['lastEdit'] = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
-        self.extendedInfo['summary'] = dict(self.summarise_objects(self))
-        self.extendedInfo['parsed'] = "{:.2%}".format(self.parsedRate)
+        self.extendedInfo = {
+            'name': os.path.splitext(os.path.basename(self.path))[0],
+            'path': self.path,
+            'lines': self.raw.count('\n'),
+            'lastEdit': "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime)),
+            'summary': dict(self.summarise_objects(self)),
+            'parsed': "{:.2%}".format(self.parsedRate)
+        }
 
 
 
