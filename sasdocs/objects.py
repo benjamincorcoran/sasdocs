@@ -179,7 +179,7 @@ class macroargument:
 class macro:
     name = attr.ib()
     arguments = attr.ib()
-    contents = attr.ib()
+    contents = attr.ib(repr=False)
 
     def __attrs_post_init__(self):
         self.contents = [obj for obj in self.contents if obj != '\n']
