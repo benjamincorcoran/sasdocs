@@ -31,7 +31,6 @@ class sasProject(object):
         
         try: 
             self.add_programs_to_project(programPaths)
-            self.get_extended_info()
         except Exception as e:
             log.error("Unable to add programs to project: {}".format(e))
             return False
@@ -46,6 +45,8 @@ class sasProject(object):
             for path in includePaths:
                 self.programs.append(sasProgram(path))
             includePaths = set(include.path for include in self.get_objects(objectType='include'))
+        
+        self.programs = [program for program in self.programs if program.failedLoad != 1]
 
     
     def summarise_project(self):
@@ -63,7 +64,7 @@ class sasProject(object):
 
     def get_extended_info(self):
         objSum, prgSum = self.summarise_project()
-        self.extendedInfo = {
+        return {
             'name': os.path.basename(self.path),
             'path': self.path,
             'programs': len(self.programs),

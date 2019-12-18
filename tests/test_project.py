@@ -5,7 +5,7 @@ from sasdocs.project import sasProject
 
 prj =  sasProject('./tests/samples/')
 
-pprint.pprint(prj.extendedInfo)
+pprint.pprint(prj.get_extended_info())
 
 # for x in prj.get_objects():
 #     print(x)

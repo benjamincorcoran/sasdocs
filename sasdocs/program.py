@@ -14,6 +14,9 @@ class sasProgram(object):
         
         if self.load_file(path) is False:
             self.contents = []
+            self.failedLoad = 1
+        else:
+            self.failedLoad = 0
 
     def load_file(self, path):
         try:
@@ -31,7 +34,6 @@ class sasProgram(object):
 
         try:
             self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True)
-            self.get_extended_info()
         except Exception as e:
             log.error("Unable to parse file: {}".format(e))
             return False
@@ -58,7 +60,7 @@ class sasProgram(object):
         return counter
 
     def get_extended_info(self):
-        self.extendedInfo = {
+        return {
             'name': os.path.splitext(os.path.basename(self.path))[0],
             'path': self.path,
             'lines': self.raw.count('\n'),
