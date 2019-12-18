@@ -15,3 +15,5 @@ def test_simple_program(case, expected):
     res = sasProgram(case)
 
 pprint.pprint(sasProgram('./tests/samples/macro_2.sas').extendedInfo)
+for x in sasProgram('./tests/samples/macro_2.sas').get_objects():
+    print(x)
