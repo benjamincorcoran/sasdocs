@@ -13,7 +13,7 @@ class sasProject(object):
     def __init__(self, path):
 
         self.programs = []
-        if self.load_project(path) is None:
+        if self.load_project(path) is False:
             return None
 
     def load_project(self, path):
@@ -21,18 +21,20 @@ class sasProject(object):
             self.path = pathlib.Path(path).resolve()
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
-            return None
+            return False
 
         try: 
             programPaths = self.path.glob('**/*.sas')
         except Exception as e:
             log.error("Unable to search folder: {}".format(e))
+            return False
         
         try: 
             self.add_programs_to_project(programPaths)
             self.get_extended_info()
         except Exception as e:
             log.error("Unable to add programs to project: {}".format(e))
+            return False
         
     def add_programs_to_project(self, programPaths):
         for path in programPaths:
