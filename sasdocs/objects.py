@@ -41,6 +41,7 @@ def force_partial_parse(parser, string, stats=False):
     Parameters:
     parser (parsy.parser): parsy valid parsing object
     string (str): String to be parsed
+    stats  (bool): Return percentage parsed if true
 
     Returns:
     list: parsed objects from string"""
