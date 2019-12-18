@@ -18,13 +18,13 @@ class sasProject(object):
 
     def load_project(self, path):
         try:
-            self.path = pathlib.Path(path).resolve()
+            self.path = pathlib.Path(path).resolve(strict=True)
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
             return False
 
         try: 
-            programPaths = self.path.glob('**/*.sas')
+            programPaths = self.path.rglob('*.sas')
         except Exception as e:
             log.error("Unable to search folder: {}".format(e))
             return False

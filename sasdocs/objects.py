@@ -350,7 +350,7 @@ mcroStart = ps.seq(
     arguments = (opspc >> mcroargline).optional() << opspc + col 
 ).combine_dict(macroStart)
 
-mcroEnd = (ps.regex(r'%mend',flags=re.IGNORECASE) + opspc + col).map(macroEnd)
+mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
 
 # fullprogram: multiple SAS objects including macros
 fullprogram =  (nl|mcvDef|cmnt|datastep|proc|lbnm|icld|mcroStart|mcroEnd).many()
