@@ -6,10 +6,21 @@
 Welcome to sasdocs's documentation!
 ===================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. automodule:: sasdocs.objects
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
+.. automodule:: sasdocs.program
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: sasdocs.project
+    :members:
+    :undoc-members:
+    :show-inheritance:
+  
 
 
 Indices and tables
