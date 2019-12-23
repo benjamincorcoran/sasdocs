@@ -84,23 +84,80 @@ def force_partial_parse(parser, string, stats=False):
 
 @attr.s
 class macroVariable:
-    variable = attr.ib()
+    """
+    Abstracted python class to reference the SAS macro variable.
+    ...
 
+    Attributes
+    ----------
+    variable : str
+        Macro variable reference as used in SAS code
+    """
+    variable = attr.ib()
 
 @attr.s
 class comment:
+    """
+    Abstracted python class to reference the SAS comment.
+    ...
+
+    Attributes
+    ----------
+    text : str
+        Text contained between /**/ or *; delimiters
+    """
     text = attr.ib()
 
 @attr.s
 class macroVariableDefinition:
+    """
+    Abstracted python class for the definition and assignment of macro varaibles.
+    ...
+
+    Attributes
+    ----------
+    variable : str
+        Macro variable reference as used in SAS code
+    value : str
+        Unparsed value contained in the macro variable
+    """
     variable = attr.ib()
     value = attr.ib()
 
 @attr.s 
 class include:
+    """
+    Abstracted python class for %include statements in SAS code.
+    ...
+
+    Attributes
+    ----------
+    path : str
+        Hardcoded path used in the %include statement
+
+
+    Methods
+    -------
+    check_path_is_valid(attribute, value)
+        Resolve parsed path, if not found write error to log
+    """
     path = attr.ib()
     @path.validator
     def check_path_is_valid(self, attribute, value):
+        """
+        check_path_is_valid(attribute, value)
+
+        Set the value of path if parsed path is valid.
+
+        Parameters
+        ----------
+        attribute : str
+        value : str
+
+        Returns
+        -------
+        None
+        """
         try:
             self.path = pathlib.Path(value).resolve()
         except Exception as e:
@@ -108,6 +165,28 @@ class include:
 
 @attr.s(repr=False)
 class dataObject:
+    """
+    Abstracted python class for data objects created and used by SAS datasteps and procedures.
+    ...
+
+    Attributes
+    ----------
+    library : str or list 
+        Library in which the data is stored
+    dataset : str or list
+        Name used to reference the dataset in the code
+    options : str or DataLineOptions
+        Options applied to the dataset at a particular point 
+    name : str
+        String of the form 'library.dataset'
+    UID : str
+        Upcased version of 'library.datastep', data object's unique identifier
+
+    Methods
+    -------
+    check_path_is_valid(attribute, value)
+        Resolve parsed path, if not found write error to log
+    """
     library = attr.ib()
     dataset = attr.ib()
     options = attr.ib(default=None)
