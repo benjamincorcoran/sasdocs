@@ -35,6 +35,8 @@ class sasProject(object):
             log.error("Unable to add programs to project: {}".format(e))
             return False
         
+        self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
+        
     def add_programs_to_project(self, programPaths):
         for path in programPaths:
             if path not in [program.path for program in self.programs]:
@@ -48,6 +50,7 @@ class sasProject(object):
         
         self.programs = [program for program in self.programs if program.failedLoad != 1]
 
+        
     
     def summarise_project(self):
         objectCounter = Counter()
