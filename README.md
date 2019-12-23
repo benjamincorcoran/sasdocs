@@ -4,7 +4,7 @@
 
 *A small python library to generate rich documentation from SAS code*
 
-[![Build Status](https://travis-ci.com/benjamincorcoran/sasdocs.svg?branch=master)](https://travis-ci.com/benjamincorcoran/sasdocs) [![![Documentation Status](https://readthedocs.org/projects/sasdocs/badge/?version=latest)](https://sasdocs.readthedocs.io/en/latest/?badge=latest) [![Commits](https://img.shields.io/github/last-commit/benjamincorcoran/sasdocs.svg)](https://GitHub.com/benjamincorcoran/)
+[![Build Status](https://travis-ci.com/benjamincorcoran/sasdocs.svg?branch=master)](https://travis-ci.com/benjamincorcoran/sasdocs) [![Documentation Status](https://readthedocs.org/projects/sasdocs/badge/?version=latest)](https://sasdocs.readthedocs.io/en/latest/?badge=latest) [![Commits](https://img.shields.io/github/last-commit/benjamincorcoran/sasdocs.svg)](https://GitHub.com/benjamincorcoran/)
 
 
 This library relies on the [parsy](https://pypi.org/project/parsy/) parsing library to parse SAS code and generate python objects representing SAS concepts. 
