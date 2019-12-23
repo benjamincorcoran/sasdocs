@@ -1,2 +1,2 @@
-attr
+attrs
 parsy
