@@ -25,19 +25,6 @@ class sasProgram(object):
         Raw string version of the program file
     parsedRate : float
         Percentage of the program file successfully parsed 
-    
-    Methods
-    -------
-    load_file(path)
-        Attempt to parse file given in path arguement. Generates path, raw, parsedRate and contents.
-    get_objects(object=None, objectType=None)
-        Recursively loop through objects in contents and yield object. If objectType passed will only 
-        yield object of that objectType.
-    summarise_objects(object=None)
-        Recursively loop through objects, counting each type as seen. Return Counter object containing 
-        summary of parsed objects in the program
-    get_extended_info()
-        Return a dictionary contain extended information about the parsed file. 
     """
 
     def __init__(self, path):
@@ -60,6 +47,7 @@ class sasProgram(object):
         Parameters
         ----------
         path : str
+            Filepath to the SAS file to be parsed.
         """
         try:
             self.path = pathlib.Path(path).resolve()
@@ -140,19 +128,26 @@ class sasProgram(object):
 
     def get_extended_info(self):
         """
-        get_extended_info()
+        get_extended_info
 
-        Return a dictionary containing extended information about the parsed SAS code. 
+        Creates dictionary containing extended information about the parsed SAS code. 
+        
+        .. code-block:: rst
+
+            name : Filename of the SAS code,
+            path : Full path to the SAS code,
+            lines : Number of lines in the SAS code,
+            lastEdit : Timestamp for the last edit of the SAS code,
+            summary : Counter object returned by summarise_objects,
+            parsed : Percentage of the SAS code succesfully parsed
+            
+
 
         Returns
         -------
         dict
-            name : Filename of the SAS code
-            path : Full path to the SAS code
-            lines : Number of lines in the SAS code
-            lastEdit : Timestamp for the last edit of the SAS code
-            summary : Counter object returned by summarise_objects
-            parsed : Percentage of the SAS code succesfully parsed
+            A dictionary containing extended information about the SAS program
+
         """
         return {
             'name': os.path.splitext(os.path.basename(self.path))[0],

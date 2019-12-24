@@ -13,12 +13,17 @@ def rebuild_macros(objs, i=0):
     Recursively generate macro objects from macroStart & macroEnd objects in 
     processed list
 
-    Parameters:
-    objs (list): list of sas objects
-    i (int): recursive safe loop variable
+    Parameters
+    ----------
+    objs : list 
+        list of sas objects
+    i : int
+        recursive safe loop variable
 
-    Returns:
-    list: parsed objects from string
+    Returns
+    -------
+    list
+        parsed objects from string
     '''
     output = []
     while i < len(objs):
@@ -38,13 +43,19 @@ def rebuild_macros(objs, i=0):
 def force_partial_parse(parser, string, stats=False):
     """Force partial parse of string skipping unparsable characters
     
-    Parameters:
-    parser (parsy.parser): parsy valid parsing object
-    string (str): String to be parsed
-    stats  (bool): Return percentage parsed if true
+    Parameters
+    ----------
+    parser : parsy.parser
+        parsy valid parsing object
+    string : str
+        String to be parsed
+    stats : bool
+        Return percentage parsed if true
 
-    Returns:
-    list: parsed objects from string"""
+    Returns
+    -------
+    list
+        parsed objects from string"""
     if isinstance(string, str):
         parsed = []
         olen = len(string)
@@ -135,11 +146,6 @@ class include:
     path : str
         Hardcoded path used in the %include statement
 
-
-    Methods
-    -------
-    check_path_is_valid(attribute, value)
-        Resolve parsed path, if not found write error to log
     """
     path = attr.ib()
     @path.validator
@@ -163,6 +169,23 @@ class include:
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
 
+
+@attr.s
+class dataArg:
+    """
+    Abstracted python class for option applied inline to a data object.
+
+    Attributes
+    ----------
+    option : str
+        Inline data argument being set
+    settings : str
+        Value passed to the inline data arguement
+    """
+    option = attr.ib()
+    setting = attr.ib(default=None, repr=False)
+
+
 @attr.s(repr=False)
 class dataObject:
     """
@@ -175,7 +198,7 @@ class dataObject:
         Library in which the data is stored
     dataset : str or list
         Name used to reference the dataset in the code
-    options : str or dataLineOptions
+    options : [dataArg]
         Options applied to the dataset at a particular point 
     name : str
         String of the form 'library.dataset'
@@ -264,11 +287,6 @@ class libname:
     pointer : str, optional
         Libname reference if current libname is pointing to an already established library
 
-
-    Methods
-    -------
-    check_path_is_valid(attribute, value)
-        Resolve parsed path, if not found write error to log
     """
     library = attr.ib()
     path = attr.ib()
@@ -440,9 +458,9 @@ mcvDef = ps.seq(
 # datalineArg: Argument in dataline sasName = (setting)
 # e.g. where=(1=1)
 datalineArg = ps.seq(
-    option =sasName << (opspc + eq + opspc), 
+    option = sasName << (opspc + eq + opspc), 
     setting = lb + ps.regex(r'[^)]*') + rb
-)
+).combine_dict(dataArg)
 
 # datalineOptions: Seperate multiple datalineArgs by spaces
 datalineOptions = ps.seq(
