@@ -463,9 +463,7 @@ datalineArg = ps.seq(
 ).combine_dict(dataArg)
 
 # datalineOptions: Seperate multiple datalineArgs by spaces
-datalineOptions = ps.seq(
-    args= lb >> (datalineArg|sasName).sep_by(spc) << rb
-)
+datalineOptions = lb >> (datalineArg|sasName).sep_by(spc) << rb
 
 # dataObj: Abstracted data object exists as three components:
 #   - library: sasName before . if . exists
