@@ -104,7 +104,7 @@ class comment:
     Attributes
     ----------
     text : str
-        Text contained between /**/ or *; delimiters
+        Text contained between SAS comment delimiters delimiters
     """
     text = attr.ib()
 

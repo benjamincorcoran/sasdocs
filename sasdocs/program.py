@@ -9,6 +9,36 @@ from .objects import fullprogram, force_partial_parse
 log = logging.getLogger(__name__) 
 
 class sasProgram(object):
+    """
+    Abstracted SAS program class.
+    ...
+
+    Attributes
+    ----------
+    path : pathlib.Path
+        File path to the source of the SAS program
+    contents : list
+        List of parsed sasdocs.objects found in the program
+    failedLoad : int
+        Flag if there was a failure to load/parse the program file
+    raw : str
+        Raw string version of the program file
+    parsedRate : float
+        Percentage of the program file successfully parsed 
+    
+    Methods
+    -------
+    load_file(path)
+        Attempt to parse file given in path arguement. Generates path, raw, parsedRate and contents.
+    get_objects(object=None, objectType=None)
+        Recursively loop through objects in contents and yield object. If objectType passed will only 
+        yield object of that objectType.
+    summarise_objects(object=None)
+        Recursively loop through objects, counting each type as seen. Return Counter object containing 
+        summary of parsed objects in the program
+    get_extended_info()
+        Return a dictionary contain extended information about the parsed file. 
+    """
 
     def __init__(self, path):
         
@@ -19,6 +49,18 @@ class sasProgram(object):
             self.failedLoad = 0
 
     def load_file(self, path):
+        """
+        load_file(path)
+
+        Attempt to load the given path and parse into a sasProgram object. Errors logged on failure
+        to resolve path, read file and parse. 
+
+        Sets values of path, raw, contents and parsed rate if successful. 
+
+        Parameters
+        ----------
+        path : str
+        """
         try:
             self.path = pathlib.Path(path).resolve()
         except Exception as e:
@@ -39,6 +81,27 @@ class sasProgram(object):
             return False
 
     def get_objects(self, object=None, objectType=None):
+        """
+        get_objects(object=None, objectType=None)
+
+        Recursively loop through parsed objects in the programs contents, yielding each object. If the object 
+        is a macro object, enter and yield sas objects found in the macro's contents. 
+
+        This function will never return a macro object. 
+
+        If passed with optional objectType, this function will only yield objects of type equal to objectType. 
+
+        Parameters
+        ----------
+        object : None, macro 
+            Recursion parameter, if none loop through self.contents else loop through object.contents
+        objectType : str
+            If not none, only yield objects where the object is of type objectType.
+        
+        Yields
+        ------
+        sasdocs.object 
+        """
         if object is None:
             object = self
         for obj in object.contents:
@@ -51,6 +114,22 @@ class sasProgram(object):
                 yield obj
 
     def summarise_objects(self, object=None):
+        """
+        summarise_objects(object=None)
+
+        Recursively loop through parsed objects in the programs contents, counting each object by object type.
+        This function will count macros and the contents of said macros.
+
+        Parameters
+        ----------
+        object : None, macro 
+            Recursion parameter, if none loop through self.contents else loop through object.contents
+        
+        Returns
+        -------
+        Counter
+            Collections Counter object for all sasdoc.object types found in program.
+        """
         if object is None:
             object = self
         counter = Counter(type(obj).__name__ for obj in object.contents)
@@ -60,6 +139,21 @@ class sasProgram(object):
         return counter
 
     def get_extended_info(self):
+        """
+        get_extended_info()
+
+        Return a dictionary containing extended information about the parsed SAS code. 
+
+        Returns
+        -------
+        dict
+            name : Filename of the SAS code
+            path : Full path to the SAS code
+            lines : Number of lines in the SAS code
+            lastEdit : Timestamp for the last edit of the SAS code
+            summary : Counter object returned by summarise_objects
+            parsed : Percentage of the SAS code succesfully parsed
+        """
         return {
             'name': os.path.splitext(os.path.basename(self.path))[0],
             'path': self.path,
