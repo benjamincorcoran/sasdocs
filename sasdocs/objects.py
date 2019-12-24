@@ -175,17 +175,12 @@ class dataObject:
         Library in which the data is stored
     dataset : str or list
         Name used to reference the dataset in the code
-    options : str or DataLineOptions
+    options : str or dataLineOptions
         Options applied to the dataset at a particular point 
     name : str
         String of the form 'library.dataset'
     UID : str
         Upcased version of 'library.datastep', data object's unique identifier
-
-    Methods
-    -------
-    check_path_is_valid(attribute, value)
-        Resolve parsed path, if not found write error to log
     """
     library = attr.ib()
     dataset = attr.ib()
@@ -215,6 +210,21 @@ class dataObject:
 
 @attr.s
 class dataStep:
+    """
+    Abstracted python class for parsing datasteps.
+    ...
+
+    Attributes
+    ----------
+    outputs : list 
+        List of dataObjects the datastep outputs
+    inputs : list
+        List of dataObjects the datastep takes as inputs
+    header : str 
+        Any code between the end of the 'data ;' statement and the begining of the 'set/merge ;' statement
+    name : str
+        Any code between the end of the 'set/merge ;' statement and the 'run;' statement
+    """
     outputs = attr.ib()
     inputs = attr.ib()
     header = attr.ib(repr=False, default=None)
@@ -222,17 +232,63 @@ class dataStep:
 
 @attr.s
 class procedure:
+    """
+    Abstracted python class for parsing procedures.
+    ...
+
+    Attributes
+    ----------
+    outputs : list 
+        List of dataObjects the datastep outputs
+    inputs : list
+        List of dataObjects the datastep takes as inputs
+    type : str
+        Procedure type i.e. sort/tranpose/summary
+    """
     outputs = attr.ib()
     inputs = attr.ib()
     type = attr.ib()
     
 @attr.s 
 class libname:
+    """
+    Abstracted python class for libname statements.
+    ...
+
+    Attributes
+    ----------
+    library : str
+        libname reference as used in SAS code
+    path : str, optional
+        Hardcoded path pointing to library on disk
+    pointer : str, optional
+        Libname reference if current libname is pointing to an already established library
+
+
+    Methods
+    -------
+    check_path_is_valid(attribute, value)
+        Resolve parsed path, if not found write error to log
+    """
     library = attr.ib()
     path = attr.ib()
     pointer = attr.ib(default=None)
     @path.validator
     def check_path_is_valid(self, attribute, value):
+        """
+        check_path_is_valid(attribute, value)
+
+        Set the value of path if parsed path is valid.
+
+        Parameters
+        ----------
+        attribute : str
+        value : str
+
+        Returns
+        -------
+        None
+        """
         try:
             if self.path is not None:
                 self.path = pathlib.Path(value).resolve()
@@ -241,22 +297,68 @@ class libname:
 
 @attr.s
 class macroStart:
+    """
+    Abstracted python class for flagging start of %macro definition
+    ...
+
+    Attributes
+    ----------
+    name : str 
+        Name of the %macro being defined
+    arguements : list, optional
+        List of macroarguement objects as defined
+    """
     name = attr.ib()
     arguments = attr.ib()
 
 @attr.s
 class macroEnd:
+    """
+    Abstracted python class for flagging end of %macro definition
+    ...
+
+    Attributes
+    ----------
+    text : str
+        Dummy variable.
+    """
     text = attr.ib()
 
 
 @attr.s
 class macroargument:
+    """
+    Abstracted python class for parsing a macro arguement defintion
+    ...
+
+    Attributes
+    ----------
+    arg : str 
+        Name of the arguement
+    default : str, optional
+        Default value of the argument
+    doc : str, optional
+        Documentation comment for the arguement
+    """
     arg = attr.ib()
     default = attr.ib()
     doc = attr.ib()
 
 @attr.s
 class macro:
+    """
+    Abstracted python class for SAS macro
+    ...
+
+    Attributes
+    ----------
+    name : str 
+        Name of the marco
+    arguements : list, optional
+        List of macroarguments parsed from the macro defintion
+    contents : list
+        List of sasdocs objects parsed within the macro
+    """
     name = attr.ib()
     arguments = attr.ib()
     contents = attr.ib(repr=False)
