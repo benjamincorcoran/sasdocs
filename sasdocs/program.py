@@ -128,7 +128,7 @@ class sasProgram(object):
 
     def get_extended_info(self):
         """
-        get_extended_info
+        get_extended_info()
 
         Creates dictionary containing extended information about the parsed SAS code. 
         
