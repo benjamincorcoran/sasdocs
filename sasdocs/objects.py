@@ -97,7 +97,9 @@ def force_partial_parse(parser, string, stats=False):
 class macroVariable:
     """
     Abstracted python class to reference the SAS macro variable.
-    ...
+
+    This class recongises SAS code in the form `&variableName.` or `&variableName`
+    where the variable name 'varaibleName' is stored in the object's variable attribute.
 
     Attributes
     ----------
@@ -110,8 +112,16 @@ class macroVariable:
 class comment:
     """
     Abstracted python class to reference the SAS comment.
-    ...
 
+    This class recognises SAS code in either of the below forms and stores
+    any texts stored between the comment delimiters in the object's text
+    attribute.
+
+    .. code-block:: sas
+
+        /* Comment text */
+        * Comment text;
+    
     Attributes
     ----------
     text : str
@@ -123,13 +133,29 @@ class comment:
 class macroVariableDefinition:
     """
     Abstracted python class for the definition and assignment of macro varaibles.
-    ...
+    
+    This class recognises SAS `%let` statements and parses the reference variable and 
+    the value assigned to it in to the objects variable and value attributes respectively. 
+
+    For example
+
+    .. code-block:: sas
+
+        %let var = 1
+        %let var&i. = 1
+
+    Will be parsed into 
+
+    .. code-block:: python
+
+        macroVariableDefinition(variable='var', value='1')
+        macroVariableDefinition(variable=['var',macroVariable(variable='i')], value='1')
 
     Attributes
     ----------
-    variable : str
+    variable : str or list
         Macro variable reference as used in SAS code
-    value : str
+    value : str or list
         Unparsed value contained in the macro variable
     """
     variable = attr.ib()
@@ -139,7 +165,15 @@ class macroVariableDefinition:
 class include:
     """
     Abstracted python class for %include statements in SAS code.
-    ...
+
+    This class recognises SAS `%include` statements and parses the path assigned to it in to the objects 
+    path. 
+
+    For example
+
+    .. code-block:: sas
+
+        %include "C:/SASCode/Example1.sas"
 
     Attributes
     ----------
@@ -173,14 +207,26 @@ class include:
 @attr.s
 class dataArg:
     """
-    Abstracted python class for option applied inline to a data object.
+    Abstracted python class for an argument applied to a dataset in SAS.
+
+    This class recognises inline arguments applied to datasets in SAS code. In the 
+    below example this object would pull out the option `where` with the setting
+    `A=1`.
+
+    .. code-block:: sas
+
+        data test(where=(A=1));
+        ...
+    
+    This object is created for each argument in an inline statement and passed to the 
+    dataObject options attribute. 
 
     Attributes
     ----------
     option : str
         Inline data argument being set
     settings : str
-        Value passed to the inline data arguement
+        Value passed to the inline data argument
     """
     option = attr.ib()
     setting = attr.ib(default=None, repr=False)
@@ -190,7 +236,23 @@ class dataArg:
 class dataObject:
     """
     Abstracted python class for data objects created and used by SAS datasteps and procedures.
-    ...
+
+    This object represents a dataset, as referenced within the SAS code. In the below example
+    there are two `dataObjects` referenced, `foo` and `bar`. Both objects would be generated if this 
+    code was parsed by a dataStep parser. As `foo` has no specified library, its library attribute 
+    will default to 'work'. The bar dataset has an explicit library reference pointing to `lib1`, this will
+    be the value stored in the library attribute.
+    Any inline options will be parsed into a list and passed to the options attribute. 
+
+    .. code-block:: sas
+
+        data foo;
+            set lib1.bar;
+        run;
+        
+    dataObjects have a `name` attribute which is the combination of the library and the datastep names seperated
+    by a period. For internal linking they also have a UID attribute which is the upcased version of the name attribute.
+
 
     Attributes
     ----------
@@ -234,8 +296,21 @@ class dataObject:
 @attr.s
 class dataStep:
     """
-    Abstracted python class for parsing datasteps.
-    ...
+    Abstracted python class for parsing datasteps
+    
+    This object represents a datastep process in SAS. In the below example the dataset `foo` is 
+    passed to the object's output attribute, as parsed into a dataobject object. The dataset bar 
+    is parsed into the inputs attribute. 
+
+    Any addition code, between foo; and the set/merge statment will be saved into the header attribute 
+    and similarly any further code between the end of the set/merge statement and the end of the 
+    datastep will be parsed into the body attribute. Both the header and body remain as unparsed strings.
+
+    .. code-block:: sas
+
+        data foo;
+            set lib1.bar;
+        run;
 
     Attributes
     ----------
@@ -245,7 +320,7 @@ class dataStep:
         List of dataObjects the datastep takes as inputs
     header : str 
         Any code between the end of the 'data ;' statement and the begining of the 'set/merge ;' statement
-    name : str
+    body : str
         Any code between the end of the 'set/merge ;' statement and the 'run;' statement
     """
     outputs = attr.ib()
@@ -257,7 +332,17 @@ class dataStep:
 class procedure:
     """
     Abstracted python class for parsing procedures.
-    ...
+
+    This object parses a SAS procedure (except proc sql) into inputs, outputs and the type of procedure. 
+    The type attribute will capture the word directly after the proc indicator. In a similar way to the 
+    datastep parser, the foo and bar datasets will be parsed into the input and outputs respectively. 
+    
+    .. code-block:: sas
+
+        proc sort data=foo out=bar; by A; run;
+        proc tranpose data=foo out=bar; by A; var B; run;
+        proc summary data=foo; class A; output out=bar; run;
+
 
     Attributes
     ----------
@@ -276,7 +361,20 @@ class procedure:
 class libname:
     """
     Abstracted python class for libname statements.
-    ...
+
+    This object parses a SAS libname statement into the reference variable used in the SAS 
+    code and path it defines. In the example below the object's library attribute is 'lib1' 
+    and its path attribute is 'C:/data/'. 
+
+    In the case that the libname points to an already existing library. The value of path is 
+    None and the pointer attribute contains the value of the library being pointed to, in the 
+    example below the value of pointer would be 'lib1'.
+
+    .. code-block:: sas
+
+        libname lib1 "C:/data/";
+        libname lib2 (lib1);
+
 
     Attributes
     ----------
@@ -316,15 +414,14 @@ class libname:
 @attr.s
 class macroStart:
     """
-    Abstracted python class for flagging start of %macro definition
-    ...
+    Flagging class for start of %macro definition
 
     Attributes
     ----------
     name : str 
         Name of the %macro being defined
-    arguements : list, optional
-        List of macroarguement objects as defined
+    arguments : list, optional
+        List of macroargument objects as defined
     """
     name = attr.ib()
     arguments = attr.ib()
@@ -332,8 +429,7 @@ class macroStart:
 @attr.s
 class macroEnd:
     """
-    Abstracted python class for flagging end of %macro definition
-    ...
+    Flagging class for end of %macro definition
 
     Attributes
     ----------
@@ -346,17 +442,31 @@ class macroEnd:
 @attr.s
 class macroargument:
     """
-    Abstracted python class for parsing a macro arguement defintion
-    ...
+    Abstracted python class for parsing a macro argument defintion.
+
+    This class parses the marco arguments that are definied in the macro 
+    definition. The arg attribute contains the local macro variable name. The
+    default attribute contains the default value defined for the arguement, if no
+    default value is defined then the default attribute is None. Any comments 
+    next to the argument definition are parsed and passed to the doc attribute. 
+
+    In the below example, the arg value is 'arg1' and 'arg2', the default values are
+    None and 'N' and the doc attributes are 'Arg1 docstring' and 'Arg2 docstring'
+    respectively. 
+    
+    .. code-block:: sas
+
+        %macro run(arg1 /*Arg1 docstring*/, arg2=N /*Arg2 docstring*/);
+        ...
 
     Attributes
     ----------
     arg : str 
-        Name of the arguement
+        Name of the argument
     default : str, optional
         Default value of the argument
     doc : str, optional
-        Documentation comment for the arguement
+        Documentation comment for the argument
     """
     arg = attr.ib()
     default = attr.ib()
@@ -365,14 +475,28 @@ class macroargument:
 @attr.s
 class macro:
     """
-    Abstracted python class for SAS macro
-    ...
+    Abstracted python class for SAS macro.
+    
+    This class parses a SAS macro. In the example below the objects name attribute is
+    'run'. The arguments attribute is the parsed arguments defined in the macro variable. The 
+    contents attribute is any parseable SAS object found between the end of the `%macro` statement
+    and the `%mend` statement. 
+
+    .. code-block:: sas
+
+        %macro run(arg1 /*Arg1 docstring*/, arg2=N /*Arg2 docstring*/);
+            data &arg1.;
+                set &arg2.; 
+            run;
+        %mend;
+    
+
 
     Attributes
     ----------
     name : str 
         Name of the marco
-    arguements : list, optional
+    arguments : list, optional
         List of macroarguments parsed from the macro defintion
     contents : list
         List of sasdocs objects parsed within the macro
