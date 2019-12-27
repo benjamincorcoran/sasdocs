@@ -34,6 +34,7 @@ class sasProgram(object):
             self.failedLoad = 1
         else:
             self.failedLoad = 0
+            self.get_extended_info()
 
     def load_file(self, path):
         """
@@ -130,7 +131,7 @@ class sasProgram(object):
         """
         get_extended_info()
 
-        Creates dictionary containing extended information about the parsed SAS code. 
+        Creates class attributes for extended information about the parsed SAS code. 
         
         .. code-block:: rst
 
@@ -140,23 +141,13 @@ class sasProgram(object):
             lastEdit : Timestamp for the last edit of the SAS code,
             summary : Counter object returned by summarise_objects,
             parsed : Percentage of the SAS code succesfully parsed
-            
-
-
-        Returns
-        -------
-        dict
-            A dictionary containing extended information about the SAS program
-
         """
-        return {
-            'name': os.path.splitext(os.path.basename(self.path))[0],
-            'path': self.path,
-            'lines': self.raw.count('\n'),
-            'lastEdit': "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime)),
-            'summary': dict(self.summarise_objects()),
-            'parsed': "{:.2%}".format(self.parsedRate)
-        }
+        
+        self.name = os.path.splitext(os.path.basename(self.path))[0]
+        self.lines = self.raw.count('\n'),
+        self.lastEdit = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime)),
+        self.summary = dict(self.summarise_objects()),
+        self.parsed = "{:.2%}".format(self.parsedRate)
     
     def __repr__(self):
         return os.path.basename(self.path)
