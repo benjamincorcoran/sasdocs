@@ -32,6 +32,8 @@ class sasProject(object):
         self.programs = []
         if self.load_project(path) is False:
             return None
+        
+        self.get_extended_info()
 
     def load_project(self, path):
         """
@@ -161,13 +163,12 @@ class sasProject(object):
 
         """
         objSum, prgSum = self.summarise_project()
-        return {
-            'name': os.path.basename(self.path),
-            'path': self.path,
-            'programs': len(self.programs),
-            'summary': dict(objSum),
-            'objects': dict(prgSum)
-        }
+        
+        self.name = os.path.basename(self.path)
+        self.programs = len(self.programs)
+        self.summary = dict(objSum)
+        self.objects = dict(prgSum)
+        
                 
                 
 
