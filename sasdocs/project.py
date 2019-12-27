@@ -163,9 +163,3 @@ class sasProject(object):
         self.programs = len(self.programs)
         self.summary = dict(objSum)
         self.objects = dict(prgSum)
-        
-                
-                
-
-
-
