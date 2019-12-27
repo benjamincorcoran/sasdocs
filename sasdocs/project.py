@@ -146,7 +146,7 @@ class sasProject(object):
         """
         get_extended_info
 
-        Creates dictionary containing extended information about the parsed SAS code. 
+        Creates class attributes for information about the SAS project. 
         
         .. code-block:: rst
 
@@ -156,11 +156,6 @@ class sasProject(object):
             summary : Counter object returned by summarise_objects,
             objects : Dictionary of Counter objects indexed by program 
             
-        Returns
-        -------
-        dict
-            A dictionary containing extended information about the SAS program
-
         """
         objSum, prgSum = self.summarise_project()
         
