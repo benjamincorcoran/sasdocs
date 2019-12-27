@@ -1,0 +1,23 @@
+# {{project.name}} Documentation
+*Last built: {{project.buildTime}}*
+
+{{project.readme}}
+
+
+## Programs 
+| Program | Parsed |
+| --- | --- | 
+{for program in project.programs}| {{program.name}} | {{program.parsed}} | 
+{endfor}
+
+## Macros 
+| Macro | 
+| --- | 
+{for macro in project.macros}| {{macro.name}} | 
+{endfor}
+
+## Libraries
+| Library | Path | 
+| --- | --- | 
+{for library in project.libraries}| {{library.library}} | {{library.path}} |
+{endfor}

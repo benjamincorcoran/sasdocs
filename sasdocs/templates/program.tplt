@@ -1,9 +1,18 @@
-# {{program.get_extended_info().name}}
-*{{program.get_extended_info().lastEdit}}*
+{{program.name}}
 
-## Summary 
+{{program.path}}
+{{program.lastEdit}}
+{{program.parsed}}
 
-| Type | Count |
-| --- | ---: | 
-{% for key, value in program.get_extended_info().summary.items() %}| {{key}} | {{value}} | 
-{% endfor %}
+{{program.documentation}}
+{{program.summary}}
+
+{{program.networkDiagram}}
+
+{for library in program.libraries}
+    {{library}}
+{endfor}
+
+{{for include in program.includes}}
+    {{include}}
+{endfor}
