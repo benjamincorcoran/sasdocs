@@ -507,6 +507,19 @@ class macro:
 
     def __attrs_post_init__(self):
         self.contents = [obj for obj in self.contents if obj != '\n']
+        about = []
+        for obj in self.contents:
+            if type(obj).__name__ == 'comment':
+                about.append(obj)
+            else:
+                break
+        if len(about) == 0:
+            self.about = 'No docstring found.'
+            self.documented = False
+        else:
+            self.about = '\n'.join([comment.text for comment in about])
+            self.documented = True
+        
 
 
 # Parsy Objects
