@@ -5,19 +5,20 @@
 
 
 ## Programs 
-| Program | Parsed |
-| --- | --- | 
-{for program in project.programs}| {{program.name}} | {{program.parsed}} | 
-{endfor}
+| Program | Path | Parsed | 
+| --- | --- | ---: | 
+{% for program in project.programs %}| {{program.name}} | {{program.path}} | {{program.parsed}} |
+{% endfor %}
 
 ## Macros 
-| Macro | 
-| --- | 
-{for macro in project.macros}| {{macro.name}} | 
-{endfor}
+| Macro | About |
+| --- | --- | 
+{% for macro in project.get_objects(objectType='macro') %}| {{''.join(macro.name)}} | 
+{% endfor %}
+
 
 ## Libraries
 | Library | Path | 
 | --- | --- | 
-{for library in project.libraries}| {{library.library}} | {{library.path}} |
-{endfor}
+{% for library in project.get_objects(objectType='libname') %}| {{''.join(library.library)}} | {{library.path}} |
+{% endfor %}
