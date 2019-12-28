@@ -17,7 +17,4 @@ def write_to_markdown(project):
 
 
 test_project = sasProject(r'./tests/samples/')
-for x in test_project.get_objects(objectType='macro'):
-    print(x)
-
 write_to_markdown(test_project)
