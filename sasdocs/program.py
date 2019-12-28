@@ -95,6 +95,8 @@ class sasProgram(object):
             object = self
         for obj in object.contents:
             if type(obj).__name__ == 'macro':
+                if objectType == 'macro':
+                    yield obj
                 yield from self.get_objects(obj, objectType=objectType)
             elif objectType is not None:
                 if type(obj).__name__ == objectType:
