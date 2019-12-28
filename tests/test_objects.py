@@ -149,7 +149,7 @@ testcases = [
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
-def test_macro_about_parse(case, expected):
+def test_macro_parse(case, expected):
     assert force_partial_parse(fullprogram, case) == [expected]
 
 testcases = [
@@ -159,7 +159,7 @@ testcases = [
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
-def test_macro_parse(case, expected):
+def test_macro_about_parse(case, expected):
     macro = force_partial_parse(fullprogram,case)[0]
     assert macro.about == expected
 
