@@ -2,6 +2,7 @@ import os
 import datetime 
 import logging
 import pathlib
+import datetime
 
 from collections import Counter
 from .program import sasProgram
@@ -34,6 +35,7 @@ class sasProject(object):
             return None
         
         self.get_extended_info()
+        self.add_documentation_to_project()
 
     def load_project(self, path):
         """
@@ -96,6 +98,28 @@ class sasProject(object):
             includePaths = set(include.path for include in self.get_objects(objectType='include'))
         
         self.programs = [program for program in self.programs if program.failedLoad != 1]
+    
+    def add_documentation_to_project(self):
+        """
+        Add any documenation found in the project as an attribute.
+
+        Creates readme and documentation attributes.
+        """
+        mdPaths = self.path.glob('*.md')
+
+        # Test for README in root directory
+        readMe = self.path.joinpath('readme.md')
+        if readMe.is_file():
+            with self.path.joinpath('readme.md').open() as f:
+                self.readme = f.read()
+        else:
+            self.readme = ''
+        
+        self.documentation = {}
+        for path in mdPaths:
+            with path.open() as f:
+                self.documentation[path.name] = f.read()
+        
     
     def summarise_project(self):
         """
@@ -160,6 +184,8 @@ class sasProject(object):
         objSum, prgSum = self.summarise_project()
         
         self.name = os.path.basename(self.path)
-        self.programs = len(self.programs)
         self.summary = dict(objSum)
         self.objects = dict(prgSum)
+        self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
+        
+ 
