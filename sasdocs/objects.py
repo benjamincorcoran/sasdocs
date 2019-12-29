@@ -355,8 +355,9 @@ class procedure:
     """
     outputs = attr.ib()
     inputs = attr.ib()
-    type = attr.ib()
+    type = attr.ib(default='sql')
     
+
 @attr.s 
 class libname:
     """
@@ -646,6 +647,21 @@ proc = ps.seq(
     _h3 = ps.regex(r'.*?(?=run|quit)', flags=reFlags),
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
+
+# crtetbl: Parser for create table sql statement
+
+crtetbl = ps.seq(
+    outputs = ps.regex(r'create table', flags=reFlags) + opspc >> dataObj <<  opspc + ps.regex(r'as'),
+    inputs = (ps.regex(r'.*?from', flags=reFlags) + spc + opspc >> dataObj).many(),
+    _h = ps.regex(r'.*?(?=;)', flags=reFlags) + col
+).combine_dict(procedure)
+
+# sql: Abstracted proc sql statement, three primary components:
+#   - output: Output of the create table statement
+#   - inputs Any dataset referenced next to a from statement
+
+sql = ps.regex(r'proc sql', flags=reFlags) + opspc + col + opspc >> crtetbl.many() << ps.regex(r'.*?quit', flags=reFlags) + opspc + col
+
 
 # lbnm: Abstracted libname statement, three components:
 #   - library: name of library reference in code 
