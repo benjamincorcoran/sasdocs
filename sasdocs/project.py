@@ -1,4 +1,4 @@
-import os
+import re
 import datetime 
 import logging
 import pathlib
@@ -112,6 +112,8 @@ class sasProject(object):
         if readMe.is_file():
             with self.path.joinpath('readme.md').open() as f:
                 self.readme = f.read()
+                
+                self.readme = re.sub(r'(^#+\s)',r'#\1',self.readme,flags=re.M)
         else:
             self.readme = ''
         
@@ -183,7 +185,7 @@ class sasProject(object):
         """
         objSum, prgSum = self.summarise_project()
         
-        self.name = os.path.basename(self.path)
+        self.name = self.path.name
         self.summary = dict(objSum)
         self.objects = dict(prgSum)
         self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())

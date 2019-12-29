@@ -2,6 +2,7 @@ data test1;
     set a;
 run;
 %macro test;
+/*This is the test macro definition*/
 %include "a/bad/path";
 
 data test1;

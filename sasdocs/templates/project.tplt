@@ -13,7 +13,7 @@
 ## Macros 
 | Macro | About |
 | --- | --- | 
-{% for macro in project.get_objects(objectType='macro') %}| {{''.join(macro.name)}} | 
+{% for macro in project.get_objects(objectType='macro') %}| {{''.join(macro.name)}} | {{macro.about}} |
 {% endfor %}
 
 
