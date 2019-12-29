@@ -9,14 +9,28 @@ from itertools import chain
 
 log = logging.getLogger(__name__) 
 
-def flatten(aList):
-    f = []
-    for obj in aList:
-        if not isinstance(obj, list):
-            f.append(obj)
+def flatten_list(aList):
+    '''
+    Recursively dig through a list flattening all none list
+    objects into a single list. 
+
+    Parameters
+    ----------
+    aList : list 
+        List of nested lists and objects to be flattened
+    
+    Returns
+    -------
+    list
+        Flattened list containing all objects found in aList
+    '''
+    rt = []
+    for item in aList:
+        if not isinstance(item, list):
+            rt.append(item)
         else:
-            f.extend(flatten(obj))
-    return f
+            rt.extend(flatten(item))
+    return rt
 
 
 def rebuild_macros(objs, i=0):
