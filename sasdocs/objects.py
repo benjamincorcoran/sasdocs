@@ -5,7 +5,18 @@ import attr
 import re
 import parsy as ps
 
+from itertools import chain
+
 log = logging.getLogger(__name__) 
+
+def flatten(aList):
+    f = []
+    for obj in aList:
+        if not isinstance(obj, list):
+            f.append(obj)
+        else:
+            f.extend(flatten(obj))
+    return f
 
 
 def rebuild_macros(objs, i=0):
@@ -356,7 +367,11 @@ class procedure:
     outputs = attr.ib()
     inputs = attr.ib()
     type = attr.ib(default='sql')
-    
+
+    def __attrs_post_init__(self):
+        self.outputs=flatten([self.outputs])
+        self.inputs=flatten([self.inputs])
+
 
 @attr.s 
 class libname:
@@ -651,8 +666,8 @@ proc = ps.seq(
 # crtetbl: Parser for create table sql statement
 
 crtetbl = ps.seq(
-    outputs = ps.regex(r'create table', flags=reFlags) + opspc >> dataObj <<  opspc + ps.regex(r'as'),
-    inputs = (ps.regex(r'.*?from', flags=reFlags) + spc + opspc >> dataObj).many(),
+    outputs = ps.regex(r'create table', flags=reFlags) + opspc >> dataObj.sep_by(opspc+cmm+opspc) <<  opspc + ps.regex(r'as'),
+    inputs = (ps.regex(r'.*?from', flags=reFlags) + spc + opspc >> dataObj.sep_by(opspc+cmm+opspc)).many(),
     _h = ps.regex(r'.*?(?=;)', flags=reFlags) + col
 ).combine_dict(procedure)
 
