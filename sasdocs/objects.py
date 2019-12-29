@@ -733,7 +733,7 @@ mcroStart = ps.seq(
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
 
 # fullprogram: multiple SAS objects including macros
-fullprogram =  (nl|mcvDef|cmnt|datastep|proc|lbnm|icld|mcroStart|mcroEnd).many()
+fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd).many()
 
 
 
