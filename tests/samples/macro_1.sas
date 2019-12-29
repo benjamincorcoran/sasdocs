@@ -1,3 +1,6 @@
+/*This is the macro_1 sas program*/
+/* */
+/*Ben Corcoran 2019*/
 data test1;
     set a;
 run;

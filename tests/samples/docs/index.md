@@ -1,5 +1,5 @@
 # samples Documentation
-*Last built: 2019-12-29 11:37*
+`Last built: 2019-12-29 14:25`
 
 ## This is the sample project 
 
@@ -16,7 +16,7 @@ Contribution to the samples project can be done through DevOps.
 ## Programs 
 | Program | Path | Parsed | 
 | --- | --- | ---: | 
-| [macro_1](./macro_1.md) | /home/ben/Documents/sasdocs/tests/samples/macro_1.sas | 99.46% |
+| [macro_1](./macro_1.md) | /home/ben/Documents/sasdocs/tests/samples/macro_1.sas | 99.60% |
 | [simple_1](./simple_1.md) | /home/ben/Documents/sasdocs/tests/samples/simple_1.sas | 100.00% |
 | [macro_2](./macro_2.md) | /home/ben/Documents/sasdocs/tests/samples/macro_2.sas | 79.02% |
 

@@ -1,9 +1,13 @@
 # simple_1
-*Path: /home/ben/Documents/sasdocs/tests/samples/simple_1.sas*
-*Last Edit: 2019-12-28 13:49*
-*Parsed: 100.00%*
+`Last built: 2019-12-28 13:49`
 
+`Path: /home/ben/Documents/sasdocs/tests/samples/simple_1.sas`
 
+`Parsed: 100.00%`
+
+## Documentation
+
+No documentation found.
 
 ## Summary 
 

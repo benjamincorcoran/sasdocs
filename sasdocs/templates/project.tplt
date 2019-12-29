@@ -1,5 +1,5 @@
 # {{project.name}} Documentation
-*Last built: {{project.buildTime}}*
+`Last built: {{project.buildTime}}`
 
 {{project.readme}}
 

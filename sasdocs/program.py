@@ -35,6 +35,7 @@ class sasProgram(object):
         else:
             self.failedLoad = 0
             self.get_extended_info()
+            self.get_documentation()
 
     def load_file(self, path):
         """
@@ -151,6 +152,21 @@ class sasProgram(object):
         self.summary = dict(self.summarise_objects())
         self.parsed = "{:.2%}".format(self.parsedRate)
     
+
+    def get_documentation(self):
+        cmnts = []
+        for obj in self.contents:
+            if type(obj).__name__ == 'comment':
+                cmnts.append(obj)
+            else:
+                break
+        if len(cmnts) == 0:
+            self.documentation = 'No documentation found.'
+            self.documented = False
+        else:
+            self.documentation = '\n'.join([comment.text for comment in cmnts])
+            self.documented = True
+
     def __repr__(self):
         return self.path.name
 

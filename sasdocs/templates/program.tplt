@@ -1,7 +1,11 @@
 # {{program.name}}
-*Path: {{program.path}}*
-*Last Edit: {{program.lastEdit}}*
-*Parsed: {{program.parsed}}*
+`Last built: {{program.lastEdit}}`
+
+`Path: {{program.path}}`
+
+`Parsed: {{program.parsed}}`
+
+## Documentation
 
 {{program.documentation}}
 

@@ -1,9 +1,13 @@
 # macro_2
-*Path: /home/ben/Documents/sasdocs/tests/samples/macro_2.sas*
-*Last Edit: 2019-12-27 11:53*
-*Parsed: 79.02%*
+`Last built: 2019-12-27 11:53`
 
+`Path: /home/ben/Documents/sasdocs/tests/samples/macro_2.sas`
 
+`Parsed: 79.02%`
+
+## Documentation
+
+No documentation found.
 
 ## Summary 
 
