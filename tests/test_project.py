@@ -20,7 +20,8 @@ def write_to_markdown(project, outdir=None):
         with path.open() as f:
             templates[key] = jinja2.Template(f.read())
 
-    outdir.joinpath('project.md').write_text(templates['project'].render(project=project))
+    outdir.joinpath('index.md').write_text(templates['project'].render(project=project))
+    outdir.joinpath('macroIndex.md').write_text(templates['macroIndex'].render(project=project))
     for program in project.programs:
         outdir.joinpath(program.name+'.md').write_text(templates['program'].render(program=program))
 
