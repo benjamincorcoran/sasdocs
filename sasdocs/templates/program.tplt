@@ -1,18 +1,27 @@
-{{program.name}}
-
-{{program.path}}
-{{program.lastEdit}}
-{{program.parsed}}
+# {{program.name}}
+*Path: {{program.path}}*
+*Last Edit: {{program.lastEdit}}*
+*Parsed: {{program.parsed}}*
 
 {{program.documentation}}
-{{program.summary}}
+
+## Summary 
+
+| Object | Count | 
+| --- | ---: | 
+{% for obj, count in program.summary.items() %}| {{obj}} | {{count}} |
+{% endfor %}
 
 {{program.networkDiagram}}
 
-{for library in program.libraries}
-    {{library}}
-{endfor}
+## Libraries
+| Library | Path | 
+| --- | --- | 
+{% for library in program.get_objects(objectType='libname') %}| {{''.join(library.library)}} | {{library.path}} |
+{% endfor %}
 
-{{for include in program.includes}}
-    {{include}}
-{endfor}
+## Include
+| Path | 
+| --- | 
+{% for include in program.get_objects(objectType='include') %}| {{include.path}} |
+{% endfor %}

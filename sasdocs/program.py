@@ -145,14 +145,14 @@ class sasProgram(object):
             parsed : Percentage of the SAS code succesfully parsed
         """
         
-        self.name = os.path.splitext(os.path.basename(self.path))[0]
-        self.lines = self.raw.count('\n'),
-        self.lastEdit = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime)),
-        self.summary = dict(self.summarise_objects()),
+        self.name = self.path.stem
+        self.lines = self.raw.count('\n')
+        self.lastEdit = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
+        self.summary = dict(self.summarise_objects())
         self.parsed = "{:.2%}".format(self.parsedRate)
     
     def __repr__(self):
-        return os.path.basename(self.path)
+        return self.path.name
 
 
 

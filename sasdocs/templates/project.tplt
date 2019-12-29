@@ -7,7 +7,7 @@
 ## Programs 
 | Program | Path | Parsed | 
 | --- | --- | ---: | 
-{% for program in project.programs %}| {{program.name}} | {{program.path}} | {{program.parsed}} |
+{% for program in project.programs %}| [{{program.name}}](./{{program.name}}.md) | {{program.path}} | {{program.parsed}} |
 {% endfor %}
 
 ## Macros 
@@ -15,7 +15,6 @@
 | --- | --- | 
 {% for macro in project.get_objects(objectType='macro') %}| {{''.join(macro.name)}} | {{macro.about}} |
 {% endfor %}
-
 
 ## Libraries
 | Library | Path | 
