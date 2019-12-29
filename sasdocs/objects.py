@@ -29,7 +29,7 @@ def flatten_list(aList):
         if not isinstance(item, list):
             rt.append(item)
         else:
-            rt.extend(flatten(item))
+            rt.extend(flatten_list(item))
     return rt
 
 
@@ -94,7 +94,8 @@ def force_partial_parse(parser, string, stats=False):
                 parsed += partialParse
         
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
-        parsed = rebuild_macros(parsed)[0]
+        flattened = flatten_list(parsed)
+        parsed = rebuild_macros(flattened)[0]
         if type(parsed) == list:
             ret = [p for p in parsed if p != '\n']
         else:
@@ -383,8 +384,8 @@ class procedure:
     type = attr.ib(default='sql')
 
     def __attrs_post_init__(self):
-        self.outputs=flatten([self.outputs])
-        self.inputs=flatten([self.inputs])
+        self.outputs=flatten_list([self.outputs])
+        self.inputs=flatten_list([self.inputs])
 
 
 @attr.s 
