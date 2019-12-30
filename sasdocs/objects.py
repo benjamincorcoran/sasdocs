@@ -7,6 +7,29 @@ import parsy as ps
 
 log = logging.getLogger(__name__) 
 
+def flatten_list(aList):
+    '''
+    Recursively dig through a list flattening all none list
+    objects into a single list. 
+
+    Parameters
+    ----------
+    aList : list 
+        List of nested lists and objects to be flattened
+    
+    Returns
+    -------
+    list
+        Flattened list containing all objects found in aList
+    '''
+    rt = []
+    for item in aList:
+        if not isinstance(item, list):
+            rt.append(item)
+        else:
+            rt.extend(flatten_list(item))
+    return rt
+
 
 def rebuild_macros(objs, i=0):
     '''
@@ -69,7 +92,8 @@ def force_partial_parse(parser, string, stats=False):
                 parsed += partialParse
         
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
-        parsed = rebuild_macros(parsed)[0]
+        flattened = flatten_list(parsed)
+        parsed = rebuild_macros(flattened)[0]
         if type(parsed) == list:
             ret = [p for p in parsed if p != '\n']
         else:
@@ -355,8 +379,28 @@ class procedure:
     """
     outputs = attr.ib()
     inputs = attr.ib()
-    type = attr.ib()
-    
+    type = attr.ib(default='sql')
+
+    def __attrs_post_init__(self):
+        self.outputs=flatten_list([self.outputs])
+        self.inputs=flatten_list([self.inputs])
+
+@attr.s
+class unparsedSQLStatement:
+    """
+    Abstracted class for unparsed SQL statements found in
+    proc sql procedures. Only currently parsed statement is
+    `create table`, all other statements are parsed into 
+    this object
+
+    Attributes
+    ----------
+    text : str
+        Raw SQL code for unparsed statement
+    """
+
+    text = attr.ib()
+
 @attr.s 
 class libname:
     """
@@ -647,6 +691,25 @@ proc = ps.seq(
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
 
+# crtetbl: Parser for create table sql statement
+
+crtetbl = ps.seq(
+    outputs = ps.regex(r'create table', flags=reFlags) + opspc >> dataObj.sep_by(opspc+cmm+opspc) <<  opspc + ps.regex(r'as'),
+    inputs = (ps.regex(r'[^;]*?from', flags=reFlags) + spc + opspc >> dataObj.sep_by(opspc+cmm+opspc)).many(),
+    _h = ps.regex(r'[^;]*?(?=;)', flags=reFlags) + col
+).combine_dict(procedure)
+
+# unparsedSQL: Capture currently unparsed SQL statements
+
+unparsedSQL = ps.regex(r'[^;]*?;(?<!quit;)', flags=reFlags).map(unparsedSQLStatement)
+
+# sql: Abstracted proc sql statement, three primary components:
+#   - output: Output of the create table statement
+#   - inputs Any dataset referenced next to a from statement
+
+sql = ps.regex(r'proc sql', flags=reFlags) + opspc + col + opspc >> (crtetbl|unparsedSQL).sep_by(opspc) << ps.regex(r'.*?quit', flags=reFlags) + opspc + col
+
+
 # lbnm: Abstracted libname statement, three components:
 #   - library: name of library reference in code 
 #   - path: filepath of the library if given 
@@ -687,7 +750,7 @@ mcroStart = ps.seq(
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
 
 # fullprogram: multiple SAS objects including macros
-fullprogram =  (nl|mcvDef|cmnt|datastep|proc|lbnm|icld|mcroStart|mcroEnd).many()
+fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd).many()
 
 
 
