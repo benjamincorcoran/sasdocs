@@ -137,8 +137,25 @@ def force_partial_parse(parser, string, stats=False, mark=False):
 
 @attr.s
 class baseSASObject:
+    """
+    Base object containing general functions used by all SAS objects
+    """
 
     def set_found_posistion(self, start, end):
+        """
+        set_found_posistion(start, end)
+
+        Set the start and end attributes for the object. Used during 
+        force_partial_parse with mark=True to grab where in the SAS
+        program the object appears. 
+
+        Parameters
+        ----------
+        start : tuple 
+            The start line:char tuple for the object 
+        end : tuple 
+            The end line:char tuple for the objet 
+        """
         self.start = start
         self.end = end
 
