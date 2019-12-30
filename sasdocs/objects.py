@@ -107,7 +107,7 @@ def force_partial_parse(parser, string, stats=False, mark=False):
                     obj.set_found_posistion(start,lastPosistion)
                 
                 parsed.append(obj)
-                lastPosistion = [lastPosistion[0], lastPosistion[1]+1]
+                
 
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
         flattened = flatten_list(parsed)
