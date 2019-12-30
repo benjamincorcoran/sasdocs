@@ -5,8 +5,6 @@ import attr
 import re
 import parsy as ps
 
-from itertools import chain
-
 log = logging.getLogger(__name__) 
 
 def flatten_list(aList):
