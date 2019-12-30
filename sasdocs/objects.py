@@ -385,6 +385,21 @@ class procedure:
         self.outputs=flatten_list([self.outputs])
         self.inputs=flatten_list([self.inputs])
 
+@attr.s
+class unparsedSQLStatement:
+    """
+    Abstracted class for unparsed SQL statements found in
+    proc sql procedures. Only currently parsed statement is
+    `create table`, all other statements are parsed into 
+    this object
+
+    Attributes
+    ----------
+    text : str
+        Raw SQL code for unparsed statement
+    """
+
+    text = attr.ib()
 
 @attr.s 
 class libname:
@@ -680,15 +695,19 @@ proc = ps.seq(
 
 crtetbl = ps.seq(
     outputs = ps.regex(r'create table', flags=reFlags) + opspc >> dataObj.sep_by(opspc+cmm+opspc) <<  opspc + ps.regex(r'as'),
-    inputs = (ps.regex(r'.*?from', flags=reFlags) + spc + opspc >> dataObj.sep_by(opspc+cmm+opspc)).many(),
-    _h = ps.regex(r'.*?(?=;)', flags=reFlags) + col
+    inputs = (ps.regex(r'[^;]*?from', flags=reFlags) + spc + opspc >> dataObj.sep_by(opspc+cmm+opspc)).many(),
+    _h = ps.regex(r'[^;]*?(?=;)', flags=reFlags) + col
 ).combine_dict(procedure)
+
+# unparsedSQL: Capture currently unparsed SQL statements
+
+unparsedSQL = ps.regex(r'[^;]*?;(?<!quit;)', flags=reFlags).map(unparsedSQLStatement)
 
 # sql: Abstracted proc sql statement, three primary components:
 #   - output: Output of the create table statement
 #   - inputs Any dataset referenced next to a from statement
 
-sql = ps.regex(r'proc sql', flags=reFlags) + opspc + col + opspc >> crtetbl.many() << ps.regex(r'.*?quit', flags=reFlags) + opspc + col
+sql = ps.regex(r'proc sql', flags=reFlags) + opspc + col + opspc >> (crtetbl|unparsedSQL).sep_by(opspc) << ps.regex(r'.*?quit', flags=reFlags) + opspc + col
 
 
 # lbnm: Abstracted libname statement, three components:

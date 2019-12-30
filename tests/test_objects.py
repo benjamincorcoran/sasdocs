@@ -108,11 +108,12 @@ def test_create_table_parse(case, expected):
     assert crtetbl.parse(case) == expected
 
 testcases = [
-    ('proc sql; create table a as select * from b left join select * from c on a.a=c.a right join select * from d on a.d=d.d; quit;',procedure(outputs=dataObject(library=None, dataset=['a'], options=None), inputs=[dataObject(library=None, dataset=['b'], options=None),dataObject(library=None, dataset=['c'], options=None),dataObject(library=None, dataset=['d'], options=None)]))
+    ('proc sql; create table a as select * from b left join select * from c on a.a=c.a right join select * from d on a.d=d.d; quit;',[procedure(outputs=dataObject(library=None, dataset=['a'], options=None), inputs=[dataObject(library=None, dataset=['b'], options=None),dataObject(library=None, dataset=['c'], options=None),dataObject(library=None, dataset=['d'], options=None)])]),
+    ('proc sql; create table a as select * from b; select * from d; create table c as select * from d; quit;',[procedure(outputs=[dataObject(library=None, dataset=['a'], options=None)], inputs=[dataObject(library=None, dataset=['b'], options=None)]), unparsedSQLStatement(text='select * from d;'), procedure(outputs=[dataObject(library=None, dataset=['c'], options=None)], inputs=[dataObject(library=None, dataset=['d'], options=None)])])
 ]
 @pytest.mark.parametrize("case,expected", testcases)
 def test_sql_parse(case, expected):
-    assert sql.parse(case) == [expected]
+    assert sql.parse(case) == expected
 
 
 
