@@ -16,16 +16,14 @@
 {% for obj, count in program.summary.items() %}| {{obj}} | {{count}} |
 {% endfor %}
 
-{{program.networkDiagram}}
-
 ## Libraries
 | Library | Path | 
 | --- | --- | 
-{% for library in program.get_objects(objectType='libname') %}| {{''.join(library.library)}} | {{library.path}} |
+{% for library in program.get_objects(objectType='libname') %}| {{library.name}} | [{{library.path}}]({{library.path}}) |
 {% endfor %}
 
 ## Include
 | Path | 
 | --- | 
-{% for include in program.get_objects(objectType='include') %}| {{include.path}} |
+{% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.path.as_uri()}}) |
 {% endfor %}

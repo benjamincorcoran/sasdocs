@@ -1,12 +1,12 @@
 # Macro index
-*Last built: 2019-12-29 14:25*
+*Last built: 2019-12-30 15:33*
 
 ## Macros 
 | Macro | About |
 | --- | --- | 
 | [test](#test) | This is the test macro definition |
 | [outer](#outer) | No docstring found. |
-| [inner](#inner) |  from b |
+| [inner](#inner) | No docstring found. |
 | [innermost](#innermost) | No docstring found. |
 
 
@@ -14,17 +14,17 @@
 ## test
 This is the test macro definition
 
-[comment(text='This is the test macro definition'), include(path=PosixPath('/home/ben/Documents/sasdocs/a/bad/path')), dataStep(outputs=[work.test1], inputs=[work.test]), procedure(outputs=work.test2, inputs=work.test1, type='sort')]
+[comment(text='This is the test macro definition'), include(path=PosixPath('/home/ben/Documents/sasdocs/a/bad/path')), dataStep(outputs=[work.test1], inputs=[work.test]), procedure(outputs=[work.test2], inputs=[work.test1], type='sort')]
 
 ## outer
 No docstring found.
 
-[dataStep(outputs=[work.out], inputs=[work.a]), macro(name=['inner'], arguments=None)]
+[dataStep(outputs=[work.out], inputs=[work.a]), macro(ref=['inner'], arguments=None)]
 
 ## inner
- from b
+No docstring found.
 
-[comment(text=' from b'), dataStep(outputs=[work.inn], inputs=[work.a]), macro(name=['innermost'], arguments=None)]
+[procedure(outputs=[work.a], inputs=[work.b], type='sql'), dataStep(outputs=[work.inn], inputs=[work.a]), macro(ref=['innermost'], arguments=None)]
 
 ## innermost
 No docstring found.

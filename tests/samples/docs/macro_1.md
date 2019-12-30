@@ -1,5 +1,5 @@
 # macro_1
-`Last built: 2019-12-29 14:25`
+`Last built: 2019-12-30 14:29`
 
 `Path: /home/ben/Documents/sasdocs/tests/samples/macro_1.sas`
 
@@ -22,8 +22,6 @@ Ben Corcoran 2019
 | procedure | 1 |
 
 
-
-
 ## Libraries
 | Library | Path | 
 | --- | --- | 
@@ -32,4 +30,4 @@ Ben Corcoran 2019
 ## Include
 | Path | 
 | --- | 
-| /home/ben/Documents/sasdocs/a/bad/path |
+| [/home/ben/Documents/sasdocs/a/bad/path](file:///home/ben/Documents/sasdocs/a/bad/path) |

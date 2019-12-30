@@ -1,5 +1,5 @@
 # simple_1
-`Last built: 2019-12-28 13:49`
+`Last built: 2019-12-30 14:29`
 
 `Path: /home/ben/Documents/sasdocs/tests/samples/simple_1.sas`
 
@@ -19,15 +19,13 @@ No documentation found.
 | procedure | 1 |
 
 
-
-
 ## Libraries
 | Library | Path | 
 | --- | --- | 
-| output | /home/ben/Documents/sasdocs/path/to/output |
+| output | [/home/ben/Documents/sasdocs/path/to/output](/home/ben/Documents/sasdocs/path/to/output) |
 
 
 ## Include
 | Path | 
 | --- | 
-| /home/ben/Documents/sasdocs/a/bad/path |
+| [/home/ben/Documents/sasdocs/a/bad/path](file:///home/ben/Documents/sasdocs/a/bad/path) |

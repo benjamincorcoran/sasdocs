@@ -3,7 +3,7 @@
 
 `Path: /home/ben/Documents/sasdocs/tests/samples/macro_2.sas`
 
-`Parsed: 79.02%`
+`Parsed: 100.00%`
 
 ## Documentation
 
@@ -15,9 +15,7 @@ No documentation found.
 | --- | ---: | 
 | dataStep | 4 |
 | macro | 3 |
-| comment | 1 |
-
-
+| procedure | 1 |
 
 
 ## Libraries

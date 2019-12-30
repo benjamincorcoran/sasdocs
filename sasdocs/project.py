@@ -3,9 +3,15 @@ import datetime
 import logging
 import pathlib
 import datetime
+import jinja2
+
+import importlib.resources as pkg_resources
 
 from collections import Counter
+
+from . import templates
 from .program import sasProgram
+
 
 log = logging.getLogger(__name__) 
 
@@ -190,4 +196,38 @@ class sasProject(object):
         self.objects = dict(prgSum)
         self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
         
- 
+    def write_to_markdown(self, outdir=None):
+        """
+        write_to_markdown(outdir=None)
+
+        Write the current project out to a series of markdown files in the 
+        specified `outdir` directory. If no directory provided then write 
+        markdown files to /docs/ folder in the project's path. 
+        
+        Parameters
+        ----------
+
+        outdir: str
+            Output directory for markdown documentation
+
+        """
+        
+        if outdir is None:
+            outdir = self.path.joinpath('docs')
+        else:
+            outdir = pathlib.Path(outdir)
+        
+        outdir.mkdir(exist_ok=True)
+
+        mdFiles = dict(
+            index = pkg_resources.read_text(templates, 'index.md'),
+            macroIndex = pkg_resources.read_text(templates, 'macroIndex.md'),
+            program = pkg_resources.read_text(templates, 'program.md')
+        )
+
+        mdFiles = {k:jinja2.Template(t) for k,t in mdFiles.items()}
+
+        outdir.joinpath('index.md').write_text(mdFiles['index'].render(project=self))
+        outdir.joinpath('macroIndex.md').write_text(mdFiles['macroIndex'].render(project=self))
+        for program in self.programs:
+            outdir.joinpath(program.name+'.md').write_text(mdFiles['program'].render(program=program))

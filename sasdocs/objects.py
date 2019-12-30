@@ -52,7 +52,7 @@ def rebuild_macros(objs, i=0):
     while i < len(objs):
         obj = objs[i]
         if type(obj) == macroEnd:
-            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+            return (macro(ref=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -455,6 +455,15 @@ class libname:
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
 
+    def __attrs_post_init__(self):
+        if self.path is None and self.pointer is not None:
+            self.type = 'pointer'
+        elif self.path is not None and self.pointer is None:
+            self.type = 'path'
+        
+        self.name = ''.join(self.library)
+
+
 @attr.s
 class macroStart:
     """
@@ -545,11 +554,12 @@ class macro:
     contents : list
         List of sasdocs objects parsed within the macro
     """
-    name = attr.ib()
+    ref = attr.ib()
     arguments = attr.ib()
     contents = attr.ib(repr=False)
 
     def __attrs_post_init__(self):
+        self.name = ''.join(self.ref)
         self.contents = [obj for obj in self.contents if obj != '\n']
         about = []
         for obj in self.contents:
