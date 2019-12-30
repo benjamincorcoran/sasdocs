@@ -13,3 +13,8 @@ testcases = [
 @pytest.mark.parametrize("case,expected", testcases)
 def test_simple_program(case, expected):
     res = sasProgram(case)
+
+
+test = sasProgram(testcases[0][0])
+for obj in test.get_objects():
+    print(obj, obj.start, obj.end)

@@ -63,7 +63,7 @@ def rebuild_macros(objs, i=0):
     return output, i
 
 
-def force_partial_parse(parser, string, stats=False):
+def force_partial_parse(parser, string, stats=False, mark=False):
     """Force partial parse of string skipping unparsable characters
     
     Parameters
@@ -79,18 +79,36 @@ def force_partial_parse(parser, string, stats=False):
     -------
     list
         parsed objects from string"""
+    if mark:
+        parser = parser.mark()
     if isinstance(string, str):
         parsed = []
         olen = len(string)
         skips = 0
+        lastPosistion = (1, 0)
         while len(string) > 0:
             partialParse, string = parser.parse_partial(string)
-            if len(partialParse) == 0:
+            if mark:
+                start, obj, end = partialParse
+                start = [sum(x) for x in zip(start, lastPosistion)]
+                if end[0] == 0:
+                    lastPosistion = [sum(x) for x in zip(end, lastPosistion)]
+                else:
+                    lastPosistion = [end[0]+lastPosistion[0], end[1]]
+            else:
+                obj = partialParse
+
+            if obj is None:
                 string = string[1:]
                 skips += 1
+                lastPosistion = [lastPosistion[0], lastPosistion[1]+1]
             else:
-                parsed += partialParse
-        
+                if mark and not isinstance(obj,str):
+                    obj.set_found_posistion(start,lastPosistion)
+                
+                parsed.append(obj)
+                lastPosistion = [lastPosistion[0], lastPosistion[1]+1]
+
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
         flattened = flatten_list(parsed)
         parsed = rebuild_macros(flattened)[0]
@@ -118,7 +136,15 @@ def force_partial_parse(parser, string, stats=False):
 #     - include
 
 @attr.s
-class macroVariable:
+class baseSASObject:
+
+    def set_found_posistion(self, start, end):
+        self.start = start
+        self.end = end
+
+
+@attr.s
+class macroVariable(baseSASObject):
     """
     Abstracted python class to reference the SAS macro variable.
 
@@ -133,7 +159,7 @@ class macroVariable:
     variable = attr.ib()
 
 @attr.s
-class comment:
+class comment(baseSASObject):
     """
     Abstracted python class to reference the SAS comment.
 
@@ -154,7 +180,7 @@ class comment:
     text = attr.ib()
 
 @attr.s
-class macroVariableDefinition:
+class macroVariableDefinition(baseSASObject):
     """
     Abstracted python class for the definition and assignment of macro varaibles.
     
@@ -186,7 +212,7 @@ class macroVariableDefinition:
     value = attr.ib()
 
 @attr.s 
-class include:
+class include(baseSASObject):
     """
     Abstracted python class for %include statements in SAS code.
 
@@ -229,7 +255,7 @@ class include:
 
 
 @attr.s
-class dataArg:
+class dataArg(baseSASObject):
     """
     Abstracted python class for an argument applied to a dataset in SAS.
 
@@ -257,7 +283,7 @@ class dataArg:
 
 
 @attr.s(repr=False)
-class dataObject:
+class dataObject(baseSASObject):
     """
     Abstracted python class for data objects created and used by SAS datasteps and procedures.
 
@@ -318,7 +344,7 @@ class dataObject:
         return self.name
 
 @attr.s
-class dataStep:
+class dataStep(baseSASObject):
     """
     Abstracted python class for parsing datasteps
     
@@ -353,7 +379,7 @@ class dataStep:
     body = attr.ib(repr=False, default=None)
 
 @attr.s
-class procedure:
+class procedure(baseSASObject):
     """
     Abstracted python class for parsing procedures.
 
@@ -386,7 +412,7 @@ class procedure:
         self.inputs=flatten_list([self.inputs])
 
 @attr.s
-class unparsedSQLStatement:
+class unparsedSQLStatement(baseSASObject):
     """
     Abstracted class for unparsed SQL statements found in
     proc sql procedures. Only currently parsed statement is
@@ -402,7 +428,7 @@ class unparsedSQLStatement:
     text = attr.ib()
 
 @attr.s 
-class libname:
+class libname(baseSASObject):
     """
     Abstracted python class for libname statements.
 
@@ -456,7 +482,7 @@ class libname:
             log.error("Unable to resolve path: {}".format(e))
 
 @attr.s
-class macroStart:
+class macroStart(baseSASObject):
     """
     Flagging class for start of %macro definition
 
@@ -471,7 +497,7 @@ class macroStart:
     arguments = attr.ib()
 
 @attr.s
-class macroEnd:
+class macroEnd(baseSASObject):
     """
     Flagging class for end of %macro definition
 
@@ -484,7 +510,7 @@ class macroEnd:
 
 
 @attr.s
-class macroargument:
+class macroargument(baseSASObject):
     """
     Abstracted python class for parsing a macro argument defintion.
 
@@ -517,7 +543,7 @@ class macroargument:
     doc = attr.ib()
 
 @attr.s
-class macro:
+class macro(baseSASObject):
     """
     Abstracted python class for SAS macro.
     
@@ -750,7 +776,5 @@ mcroStart = ps.seq(
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
 
 # fullprogram: multiple SAS objects including macros
-fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd).many()
-
-
+fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd).optional()
 
