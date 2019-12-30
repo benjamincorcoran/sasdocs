@@ -65,7 +65,7 @@ class sasProgram(object):
             return False
 
         try:
-            self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True)
+            self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True, mark=True)
         except Exception as e:
             log.error("Unable to parse file: {}".format(e))
             return False
