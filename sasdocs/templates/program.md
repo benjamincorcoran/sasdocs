@@ -27,3 +27,9 @@
 | --- | 
 {% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.path.as_uri()}}) |
 {% endfor %}
+
+## Raw code 
+
+```sas
+{{program.raw}}
+```
