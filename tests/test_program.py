@@ -27,10 +27,3 @@ def test_get_posistion_program(case, expected):
     for obj, (start, end) in zip(res.contents,expected):
         assert obj.start == start
         assert obj.end == end
-
-
-
-
-test = sasProgram(testcases[0][0])
-for obj in test.get_objects():
-    print(obj, obj.start, obj.end)
