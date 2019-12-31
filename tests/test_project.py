@@ -6,4 +6,7 @@ import jinja2
 from sasdocs.project import sasProject
 
 test_project = sasProject(r'./tests/samples/')
-test_project.write_to_markdown()
+test_project.generate_documentation()
+
+for key, value in test_project.documentation.items():
+    print(key, value.keys())

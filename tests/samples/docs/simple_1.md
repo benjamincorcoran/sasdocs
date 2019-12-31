@@ -1,5 +1,5 @@
 # simple_1
-`Last built: 2019-12-30 14:29`
+`Last built: 2019-12-31 10:30`
 
 `Path: /home/ben/Documents/sasdocs/tests/samples/simple_1.sas`
 
@@ -19,16 +19,20 @@ No documentation found.
 | procedure | 1 |
 
 
+
 ## Libraries
-| Library | Path | 
+| Library | Path | Line | 
+| --- | --- | --- |
+| output | [/home/ben/Documents/sasdocs/path/to/output](/home/ben/Documents/sasdocs/path/to/output) | 2 |
+
+
+
+
+## Includes
+| Path | Line | 
 | --- | --- | 
-| output | [/home/ben/Documents/sasdocs/path/to/output](/home/ben/Documents/sasdocs/path/to/output) |
+| [/home/ben/Documents/sasdocs/a/bad/path](file:///home/ben/Documents/sasdocs/a/bad/path) | 1 | 
 
-
-## Include
-| Path | 
-| --- | 
-| [/home/ben/Documents/sasdocs/a/bad/path](file:///home/ben/Documents/sasdocs/a/bad/path) |
 
 
 ## Raw code 
@@ -38,7 +42,7 @@ No documentation found.
 libname output "path/to/output";
 
 data test1;
-    set work.test;
+    set test;
 run;
 
 proc sort data=test1 out=test2; run;

@@ -2,9 +2,14 @@ import os
 import datetime 
 import logging
 import pathlib
+import jinja2
 
 from collections import Counter
+import importlib.resources as pkg_resources
+
+from . import templates
 from .objects import fullprogram, force_partial_parse
+
 
 log = logging.getLogger(__name__) 
 
@@ -166,6 +171,23 @@ class sasProgram(object):
         else:
             self.documentation = '\n'.join([comment.text for comment in cmnts])
             self.documented = True
+    
+    def generate_documentation(self):
+        """
+        generate_documentation
+
+        Generate documentation for the program using the jinja2 template
+
+        Returns
+        -------
+        str
+            jinja2 templated version of this program
+
+        """
+
+        template = jinja2.Template(pkg_resources.read_text(templates, 'program.md'))
+        return template.render(program=self)
+
 
     def __repr__(self):
         return self.path.name

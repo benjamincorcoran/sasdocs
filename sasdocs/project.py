@@ -37,11 +37,12 @@ class sasProject(object):
 
     def __init__(self, path):
         self.programs = []
+        self.documentation = {}
+
         if self.load_project(path) is False:
             return None
         
         self.get_extended_info()
-        self.add_documentation_to_project()
 
     def load_project(self, path):
         """
@@ -105,7 +106,7 @@ class sasProject(object):
         
         self.programs = [program for program in self.programs if program.failedLoad != 1]
     
-    def add_documentation_to_project(self):
+    def add_addtional_documentation_to_project(self):
         """
         Add any documenation found in the project as an attribute.
 
@@ -123,10 +124,11 @@ class sasProject(object):
         else:
             self.readme = ''
         
-        self.documentation = {}
+        docs = {}
         for path in mdPaths:
             with path.open() as f:
-                self.documentation[path.name] = f.read()
+                docs[path.relative_to(self.path)] = f.read()
+        self.documentation['additional'] = docs
         
     
     def summarise_project(self):
@@ -196,38 +198,27 @@ class sasProject(object):
         self.objects = dict(prgSum)
         self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
         
-    def write_to_markdown(self, outdir=None):
+    def generate_documentation(self):
         """
-        write_to_markdown(outdir=None)
+        generate_documentation(outdir=None)
 
-        Write the current project out to a series of markdown files in the 
-        specified `outdir` directory. If no directory provided then write 
-        markdown files to /docs/ folder in the project's path. 
-        
-        Parameters
-        ----------
-
-        outdir: str
-            Output directory for markdown documentation
+        Generate documentation for the project using the jinja2 templates
 
         """
-        
-        if outdir is None:
-            outdir = self.path.joinpath('docs')
-        else:
-            outdir = pathlib.Path(outdir)
-        
-        outdir.mkdir(exist_ok=True)
+        self.add_addtional_documentation_to_project()
 
         mdFiles = dict(
             index = pkg_resources.read_text(templates, 'index.md'),
             macroIndex = pkg_resources.read_text(templates, 'macroIndex.md'),
-            program = pkg_resources.read_text(templates, 'program.md')
         )
 
         mdFiles = {k:jinja2.Template(t) for k,t in mdFiles.items()}
 
-        outdir.joinpath('index.md').write_text(mdFiles['index'].render(project=self))
-        outdir.joinpath('macroIndex.md').write_text(mdFiles['macroIndex'].render(project=self))
-        for program in self.programs:
-            outdir.joinpath(program.name+'.md').write_text(mdFiles['program'].render(program=program))
+        self.documentation['project']  = {
+            'index': mdFiles['index'].render(project=self),
+            'macroIndex' : mdFiles['macroIndex'].render(project=self)
+        }
+
+        self.documentation['programs']  = {program.path.relative_to(self.path): program.generate_documentation() for program in self.programs}
+
+        
