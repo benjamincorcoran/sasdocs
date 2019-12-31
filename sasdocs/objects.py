@@ -86,8 +86,10 @@ def force_partial_parse(parser, string, stats=False, mark=False):
         olen = len(string)
         skips = 0
         lastPosistion = (1, 0)
+
         while len(string) > 0:
             partialParse, string = parser.parse_partial(string)
+            
             if mark:
                 start, obj, end = partialParse
                 start = [sum(x) for x in zip(start, lastPosistion)]
@@ -104,7 +106,11 @@ def force_partial_parse(parser, string, stats=False, mark=False):
                 lastPosistion = [lastPosistion[0], lastPosistion[1]+1]
             else:
                 if mark and not isinstance(obj,str):
-                    obj.set_found_posistion(start,lastPosistion)
+                    if isinstance(obj,list):
+                        for x in obj:
+                            x.set_found_posistion(start,lastPosistion)
+                    else:
+                        obj.set_found_posistion(start,lastPosistion)
                 
                 parsed.append(obj)
                 
