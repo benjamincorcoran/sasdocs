@@ -5,7 +5,7 @@ from sasdocs.program import sasProgram
 
 
 testcases = [
-    ('./tests/samples/simple_1.sas',[include(path='a/bad/path'),dataStep(outputs=[dataObject(library=None,dataset=['test1'],options=None)], inputs=[dataObject(library=None,dataset=['test'],options=None)], header='\n    ', body='\n'),procedure(type='sort',outputs=[dataObject(library=None,dataset=['test2'],options=None)],inputs=[dataObject(library=None,dataset=['test1'],options=None)])]),
+    ('./tests/samples/simple_1.sas',[include(path='a/bad/path'),libname(library=["output"],path="path/to/output",pointer=None),dataStep(outputs=[dataObject(library=None,dataset=['test1'],options=None)], inputs=[dataObject(library=None,dataset=['test'],options=None)], header='\n    ', body='\n'),procedure(type='sort',outputs=[dataObject(library=None,dataset=['test2'],options=None)],inputs=[dataObject(library=None,dataset=['test1'],options=None)])]),
     # ('./tests/samples/macro_1.sas',None),
     # ('./tests/samples/macro_2.sas',None)
 ]
@@ -16,7 +16,7 @@ def test_simple_program(case, expected):
     assert res.contents == expected
 
 testcases = [
-    ('./tests/samples/simple_1.sas',[([1,0],[1,22]),([3,0],[5,4]),([7,0],[7,36])]),
+    ('./tests/samples/simple_1.sas',[([1,0],[1,22]),([2,0],[2,32]),([4,0],[6,4]),([8,0],[8,36])]),
     # ('./tests/samples/macro_1.sas',None),
     # ('./tests/samples/macro_2.sas',None)
 ]

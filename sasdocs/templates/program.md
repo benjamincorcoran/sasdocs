@@ -17,15 +17,15 @@
 {% endfor %}
 
 ## Libraries
-| Library | Path | 
-| --- | --- | 
-{% for library in program.get_objects(objectType='libname') %}| {{library.name}} | [{{library.path}}]({{library.path}}) |
+| Library | Path | Line | 
+| --- | --- | --- |
+{% for library in program.get_objects(objectType='libname') %}| {{library.name}} | [{{library.path}}]({{library.path}}) | {{library.start[0]}} |
 {% endfor %}
 
-## Include
-| Path | 
-| --- | 
-{% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.path.as_uri()}}) |
+## Includes
+| Path | Line | 
+| --- | --- | 
+{% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.path.as_uri()}}) | {{include.start[0]}} | 
 {% endfor %}
 
 ## Raw code 
