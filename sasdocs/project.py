@@ -198,9 +198,9 @@ class sasProject(object):
         self.objects = dict(prgSum)
         self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
         
-    def generate_documentation(self):
+    def generate_documentation(self, outputDirectory=None):
         """
-        generate_documentation(outdir=None)
+        generate_documentation(outputDirectory=None)
 
         Generate documentation for the project using the jinja2 templates
 
@@ -221,4 +221,13 @@ class sasProject(object):
 
         self.documentation['programs']  = {program.path.relative_to(self.path): program.generate_documentation() for program in self.programs}
 
-        
+        if outputDirectory is not None:
+            out = pathlib.Path(outputDirectory)
+            if not out.is_dir():
+                out.mkdir()
+            
+            for page, render in self.documentation['project'].items():
+                out.joinpath(page+'.md').write_text(render)
+            
+            for page, render in self.documentation['programs'].items():
+                out.joinpath(page.stem+'.md').write_text(render)
