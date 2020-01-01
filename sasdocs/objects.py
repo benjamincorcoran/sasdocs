@@ -718,8 +718,8 @@ dataLine = dataObj.sep_by(spc)
 
 datastep = ps.seq(
     outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine << col,
-    header = ps.regex(r'.*?(?=set|merge)', flags=reFlags),
-    inputs = (opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col,
+    header = (ps.regex(r'.*?(?=set|merge)', flags=reFlags)).optional(),
+    inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col).optional(),
     body = ps.regex(r'.*?(?=run)', flags=reFlags),
     _run = run + opspc + col
 ).combine_dict(dataStep)
