@@ -51,8 +51,8 @@ def rebuild_macros(objs, i=0):
     output = []
     while i < len(objs):
         obj = objs[i]
-        if type(obj) == macroEnd:
-            return (macro(ref=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+        if len(output) > 0 and type(output[0]) == macroStart and type(obj) == macroEnd:
+            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -255,6 +255,7 @@ class include(baseSASObject):
 
     """
     path = attr.ib()
+    uri = ''
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
@@ -272,9 +273,10 @@ class include(baseSASObject):
         None
         """
         try:
-            self.path = pathlib.Path(value).resolve()
+            self.path = pathlib.Path(value).resolve(strict=True)
+            self.uri = self.path.as_uri()
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            log.warning("Unable to directly resolve path: {}".format(e))
 
 
 @attr.s
@@ -482,6 +484,11 @@ class libname(baseSASObject):
     library = attr.ib()
     path = attr.ib()
     pointer = attr.ib(default=None)
+
+    uri = ''
+    is_path = False
+    is_pointer = False
+
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
@@ -500,9 +507,19 @@ class libname(baseSASObject):
         """
         try:
             if self.path is not None:
-                self.path = pathlib.Path(value).resolve()
+                self.path = pathlib.Path(value).resolve(strict=True)
+                self.uri = self.path.as_uri()
+                self.is_path = True
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            self.is_path = True
+            log.warning("Unable to directly resolve path: {}".format(e))
+    
+    def __attrs_post_init__(self):
+        if self.path is None and self.pointer is not None:
+            self.is_pointer = True
+        
+
+
 
     def __attrs_post_init__(self):
         if self.path is None and self.pointer is not None:
@@ -634,7 +651,7 @@ reFlags = re.IGNORECASE|re.DOTALL
 # regex objects
 
 # Word: 1 or more alphanumeric characters
-wrd = ps.regex(r'[a-zA-Z0-9_-]+')
+wrd = ps.regex(r'[a-zA-Z0-9_\-]+')
 # FilePath: String terminating in a quote (used only for include and libname)
 fpth = ps.regex(r'[^\'"]+')
 
@@ -649,14 +666,13 @@ opdot = ps.string('.').optional().map(lambda x: '' if x is None else x)
 # Common identifiers
 nl = ps.string('\n')
 eq = ps.string('=')
-col = ps.string(';')
+col = ps.string(';') 
 amp = ps.string('&')
 lb = ps.string('(')
 rb = ps.string(')')
 star = ps.string('*')
 cmm = ps.string(',')
 
-anycharacter = ps.regex(r'.', flags=reFlags)
 
 # Multiline comment entry and exit points
 comstart = ps.string(r'/*')
@@ -728,8 +744,8 @@ dataLine = dataObj.sep_by(spc)
 
 datastep = ps.seq(
     outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine << col,
-    header = ps.regex(r'.*?(?=set|merge)', flags=reFlags),
-    inputs = (opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col,
+    header = (ps.regex(r'.*?(?=set|merge)', flags=reFlags)).optional(),
+    inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col).optional(),
     body = ps.regex(r'.*?(?=run)', flags=reFlags),
     _run = run + opspc + col
 ).combine_dict(dataStep)
@@ -792,14 +808,11 @@ program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
-    default = (eq + opspc >> sasName).optional(),
+    default = (eq + opspc >> (ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+')|mcv).many()).optional(),
     doc = cmnt.optional()
 ).combine_dict(macroargument)
 
 mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
-
-
-
 
 mcroStart = ps.seq(
     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,

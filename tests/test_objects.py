@@ -51,7 +51,8 @@ def test_dataLine_parse(case, expected):
     assert dataLine.parse(case) == expected
 
 testcases = [
-    ("data test.test lib2.test(where=(ax=b) rename=(a=b)); format a; set test; a = 1; b = 2; output; run;", dataStep(outputs=[dataObject(library=['test'], dataset=['test'], options=None), dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')])], header=' format a; ', inputs=[dataObject(library=None, dataset=['test'], options=None)], body=' a = 1; b = 2; output; '))
+    ("data test.test lib2.test(where=(ax=b) rename=(a=b)); format a; set test; a = 1; b = 2; output; run;", dataStep(outputs=[dataObject(library=['test'], dataset=['test'], options=None), dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')])], header=' format a; ', inputs=[dataObject(library=None, dataset=['test'], options=None)], body=' a = 1; b = 2; output; ')),
+    ("data out; input a; datalines; 1; run;", dataStep(outputs=[dataObject(library=None,dataset=['out'],options=None)],inputs=None,header=None,body=' input a; datalines; 1; '))
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
@@ -139,6 +140,10 @@ testcases = [
     ('a =1/*Docs*/', macroargument(arg=['a'],default=['1'],doc=comment(text="Docs"))),
     ('a = /*Docs*/', macroargument(arg=['a'],default=[],doc=comment(text="Docs"))),
     ('a = 1/*Docs*/', macroargument(arg=['a'],default=['1'],doc=comment(text="Docs"))),
+    ('a = a.b@c.com/*Email*/', macroargument(arg=['a'],default=['a.b@c.com'],doc=comment(text="Email"))),
+    ('a = //path/to/file/*Fpath*/', macroargument(arg=['a'],default=['//path/to/file'],doc=comment(text="Fpath"))),
+    ('a = C:/path/to/file/*Fpath*/', macroargument(arg=['a'],default=['C:/path/to/file'],doc=comment(text="Fpath"))),
+    ('a = &mVar.', macroargument(arg=['a'],default=[macroVariable(variable='&mVar.')],doc=None))
 ]
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macroargument_parse(case, expected):
@@ -263,3 +268,39 @@ def test_force_partial_marco_parse(case, expected):
     assert res == expected
 
 
+testcases = [("""
+libname a "path/to/folder";
+%let a = 1;
+data a.data2;
+    set a.data1;
+run;
+
+*inline comment;
+*inline comment;
+/*Comment*/
+proc summary data=a.data2 nway; 
+    class a b c;
+    output out=a.data3;
+run;
+%mend;
+proc transpose data=a.data3 out=a.data4;
+    by a;
+run;
+""",
+[
+libname(library=['a'], path='path/to/folder', pointer=None),
+macroVariableDefinition(variable=['a'], value=' 1'),
+dataStep(outputs=[dataObject(library=['a'], dataset=['data2'], options=None)], header='\n    ', inputs=[dataObject(library=['a'], dataset=['data1'], options=None)], body='\n'),
+comment(text='inline comment'),
+comment(text='inline comment'),
+comment(text='Comment'),
+procedure(outputs=dataObject(library=['a'], dataset=['data3'], options=None), inputs=dataObject(library=['a'], dataset=['data2'], options=None), type='summary'),
+macroEnd(text='%mend;'),
+procedure(outputs=dataObject(library=['a'], dataset=['data4'], options=None), inputs=dataObject(library=['a'], dataset=['data3'], options=None), type='transpose')
+])]
+
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_force_partial_incomplete_marco_parse(case, expected):
+    res = force_partial_parse(fullprogram, case)
+    assert res == expected
