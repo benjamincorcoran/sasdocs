@@ -656,7 +656,7 @@ program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
-    default = (eq + opspc >> ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+').optional()).optional(),
+    default = (eq + opspc >> (ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+')|mcv).many()).optional(),
     doc = cmnt.optional()
 ).combine_dict(macroargument)
 
