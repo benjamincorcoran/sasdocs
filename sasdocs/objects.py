@@ -114,7 +114,7 @@ def force_partial_parse(parser, string, stats=False, mark=False):
                 
                 parsed.append(obj)
                 
-
+        
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
         flattened = flatten_list(parsed)
         parsed = rebuild_macros(flattened)[0]

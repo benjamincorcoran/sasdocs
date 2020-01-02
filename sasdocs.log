@@ -46,3 +46,8 @@ ERROR:sasdocs.program: "&FYOUT_CODE_PATH\FINAL YEAR OUTCOME METRICS OUTPUTS.SAS"
 ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\OutputCheckingUtilities\IDbigDiff_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
 ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\DILoadingCodeUtilities\Testgo_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
 ERROR:sasdocs.program: "&SLC_CODE_PATH.\SLCCOM DATASETS.SAS": Unable to read file: [Errno 2] No such file or directory: '&SLC_CODE_PATH.\\SLCCOM DATASETS.SAS'
+ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\DILoadingCodeUtilities\Testgo_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
+ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\DILoadingCodeUtilities\Testgo_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
+ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\DILoadingCodeUtilities\Testgo_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
+ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\DILoadingCodeUtilities\Testgo_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
+ERROR:sasdocs.program: "\\hefce\ASDPROJECTS\DataImports\SASCodeLibrary\DILoadingCodeUtilities\Testgo_module.sas": Unable to parse file: 'comment' object has no attribute 'name'
