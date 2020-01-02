@@ -518,7 +518,7 @@ reFlags = re.IGNORECASE|re.DOTALL
 # regex objects
 
 # Word: 1 or more alphanumeric characters
-wrd = ps.regex(r'[a-zA-Z0-9_-]+')
+wrd = ps.regex(r'[a-zA-Z0-9_\-!\.£$%^@#~|]+')
 # FilePath: String terminating in a quote (used only for include and libname)
 fpth = ps.regex(r'[^\'"]+')
 
