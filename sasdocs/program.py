@@ -4,9 +4,11 @@ import logging
 import pathlib
 
 from collections import Counter
+
+from . import format_logger
 from .objects import fullprogram, force_partial_parse
 
-log = logging.getLogger(__name__) 
+
 
 class sasProgram(object):
     """
@@ -28,6 +30,13 @@ class sasProgram(object):
     """
 
     def __init__(self, path):
+
+        self.path = path
+        self.logger = logging.getLogger(__name__)
+        try: 
+            self.logger = format_logger(self.logger,{'path':self.path})
+        except Exception as e:
+            self.logger.error("Unable to format log. {}".format(e))
         
         if self.load_file(path) is False:
             self.contents = []
@@ -52,20 +61,20 @@ class sasProgram(object):
         try:
             self.path = pathlib.Path(path).resolve()
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            self.logger.error("Unable to resolve path: {}".format(e))
             return False
             
         try:
             with open(self.path,'r') as f :
                 self.raw = f.read()
         except Exception as e:
-            log.error("Unable to read file: {}".format(e))
+            self.logger.error("Unable to read file: {}".format(e))
             return False
 
         try:
             self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True)
         except Exception as e:
-            log.error("Unable to parse file: {}".format(e))
+            self.logger.error("Unable to parse file: {}".format(e))
             return False
 
     def get_objects(self, object=None, objectType=None):

@@ -4,9 +4,10 @@ import logging
 import pathlib
 
 from collections import Counter
+
+from . import format_logger
 from .program import sasProgram
 
-log = logging.getLogger(__name__) 
 
 class sasProject(object):
     """
@@ -29,6 +30,14 @@ class sasProject(object):
     """
 
     def __init__(self, path):
+
+        self.path = path
+        self.logger = logging.getLogger(__name__)
+        try: 
+            self.logger = format_logger(self.logger,{'path':self.path})
+        except Exception as e:
+            self.logger.error("Unable to format log. {}".format(e))
+        
         self.programs = []
         if self.load_project(path) is False:
             return None
@@ -50,19 +59,19 @@ class sasProject(object):
         try:
             self.path = pathlib.Path(path).resolve(strict=True)
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            self.logger.error("Unable to resolve path: {}".format(e))
             return False
 
         try: 
             programPaths = self.path.rglob('*.sas')
         except Exception as e:
-            log.error("Unable to search folder: {}".format(e))
+            self.logger.error("Unable to search folder: {}".format(e))
             return False
         
         try: 
             self.add_programs_to_project(programPaths)
         except Exception as e:
-            log.error("Unable to add programs to project: {}".format(e))
+            self.logger.error("Unable to add programs to project: {}".format(e))
             return False
         
         self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
