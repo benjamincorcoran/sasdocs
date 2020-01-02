@@ -255,6 +255,7 @@ class include(baseSASObject):
 
     """
     path = attr.ib()
+    uri = ''
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
@@ -272,9 +273,10 @@ class include(baseSASObject):
         None
         """
         try:
-            self.path = pathlib.Path(value).resolve()
+            self.path = pathlib.Path(value).resolve(strict=True)
+            self.uri = self.path.as_uri()
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            log.warning("Unable to directly resolve path: {}".format(e))
 
 
 @attr.s
@@ -482,6 +484,11 @@ class libname(baseSASObject):
     library = attr.ib()
     path = attr.ib()
     pointer = attr.ib(default=None)
+
+    uri = ''
+    is_path = False
+    is_pointer = False
+
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
@@ -500,9 +507,19 @@ class libname(baseSASObject):
         """
         try:
             if self.path is not None:
-                self.path = pathlib.Path(value).resolve()
+                self.path = pathlib.Path(value).resolve(strict=True)
+                self.uri = self.path.as_uri()
+                self.is_path = True
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            self.is_path = True
+            log.warning("Unable to directly resolve path: {}".format(e))
+    
+    def __attrs_post_init__(self):
+        if self.path is None and self.pointer is not None:
+            self.is_pointer = True
+        
+
+
 
 @attr.s
 class macroStart(baseSASObject):
