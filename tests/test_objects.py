@@ -100,6 +100,22 @@ testcases = [
 def test_include_parse(case, expected):
     assert cmnt.parse(case) == expected
 
+testcases = [
+    ('create table a as select * from b;',procedure(outputs=dataObject(library=None, dataset=['a'], options=None), inputs=[dataObject(library=None, dataset=['b'], options=None)]))
+]
+@pytest.mark.parametrize("case,expected", testcases)
+def test_create_table_parse(case, expected):
+    assert crtetbl.parse(case) == expected
+
+testcases = [
+    ('proc sql; create table a as select * from b left join select * from c on a.a=c.a right join select * from d on a.d=d.d; quit;',[procedure(outputs=dataObject(library=None, dataset=['a'], options=None), inputs=[dataObject(library=None, dataset=['b'], options=None),dataObject(library=None, dataset=['c'], options=None),dataObject(library=None, dataset=['d'], options=None)])]),
+    ('proc sql; create table a as select * from b; select * from d; create table c as select * from d; quit;',[procedure(outputs=[dataObject(library=None, dataset=['a'], options=None)], inputs=[dataObject(library=None, dataset=['b'], options=None)]), unparsedSQLStatement(text='select * from d;'), procedure(outputs=[dataObject(library=None, dataset=['c'], options=None)], inputs=[dataObject(library=None, dataset=['d'], options=None)])])
+]
+@pytest.mark.parametrize("case,expected", testcases)
+def test_sql_parse(case, expected):
+    assert sql.parse(case) == expected
+
+
 
 testcases = [
     ('%let a = 1;', macroVariableDefinition(variable=['a'],value=' 1')),
@@ -141,17 +157,27 @@ def test_macroargumentLine_parse(case, expected):
     assert mcroargline.parse(case) == expected
 
 testcases = [
-    ('%macro test; %mend;', macro(name=['test'], arguments=None, contents='')),
-    ('%macro test(a, b, c); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents='')),
-    ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents='')),
-    ('%macro test; data a; set b; run; %mend;', macro(name=['test'], arguments=None, contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),                                                                    
-    ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'], default=['1'], doc=comment(text='Doc A')), macroargument(arg=['b'], default=None, doc=comment(text='Doc B'))], contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),
+    ('%macro test; %mend;', macro(ref=['test'], arguments=None, contents='')),
+    ('%macro test(a, b, c); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents='')),
+    ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents='')),
+    ('%macro test; data a; set b; run; %mend;', macro(ref=['test'], arguments=None, contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),                                                                    
+    ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'], default=['1'], doc=comment(text='Doc A')), macroargument(arg=['b'], default=None, doc=comment(text='Doc B'))], contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macro_parse(case, expected):
-
     assert force_partial_parse(fullprogram, case) == [expected]
+
+testcases = [
+    ('%macro test; /*This is the test macro*/ %mend;', 'This is the test macro'),
+    ('%macro test; /*This is the test macro*/\n/*This is the second line*/%mend;', 'This is the test macro\nThis is the second line'),
+    ('%macro test; data a; set b; run; /*This is the test macro*/ %mend;', 'No docstring found.'),
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_about_parse(case, expected):
+    macro = force_partial_parse(fullprogram,case)[0]
+    assert macro.about == expected
 
 testcases = [
     ('%macro test; data a; set b; run; %mend;', [dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')]),
@@ -222,7 +248,7 @@ run;
 libname(library=['a'], path='path/to/folder', pointer=None),
 macroVariableDefinition(variable=['a'], value=' 1'),
 dataStep(outputs=[dataObject(library=['a'], dataset=['data2'], options=None)], header='\n    ', inputs=[dataObject(library=['a'], dataset=['data1'], options=None)], body='\n'),
-macro(name=['test'], arguments=None, contents=[
+macro(ref=['test'], arguments=None, contents=[
     comment(text='inline comment'),
     comment(text='inline comment'),
     comment(text='Comment'),

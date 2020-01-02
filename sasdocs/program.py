@@ -2,10 +2,12 @@ import os
 import datetime 
 import logging
 import pathlib
+import jinja2
+import importlib.resources as pkg_resources
 
 from collections import Counter
 
-from . import format_logger
+from . import templates, format_logger
 from .objects import fullprogram, force_partial_parse
 
 
@@ -43,6 +45,8 @@ class sasProgram(object):
             self.failedLoad = 1
         else:
             self.failedLoad = 0
+            self.get_extended_info()
+            self.get_documentation()
 
     def load_file(self, path):
         """
@@ -72,7 +76,7 @@ class sasProgram(object):
             return False
 
         try:
-            self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True)
+            self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True, mark=True)
         except Exception as e:
             self.logger.error("Unable to parse file: {}".format(e))
             return False
@@ -103,6 +107,8 @@ class sasProgram(object):
             object = self
         for obj in object.contents:
             if type(obj).__name__ == 'macro':
+                if objectType == 'macro':
+                    yield obj
                 yield from self.get_objects(obj, objectType=objectType)
             elif objectType is not None:
                 if type(obj).__name__ == objectType:
@@ -139,7 +145,7 @@ class sasProgram(object):
         """
         get_extended_info()
 
-        Creates dictionary containing extended information about the parsed SAS code. 
+        Creates class attributes for extended information about the parsed SAS code. 
         
         .. code-block:: rst
 
@@ -149,26 +155,48 @@ class sasProgram(object):
             lastEdit : Timestamp for the last edit of the SAS code,
             summary : Counter object returned by summarise_objects,
             parsed : Percentage of the SAS code succesfully parsed
-            
+        """
+        
+        self.name = self.path.stem
+        self.lines = self.raw.count('\n')
+        self.lastEdit = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
+        self.summary = dict(self.summarise_objects())
+        self.parsed = "{:.2%}".format(self.parsedRate)
+    
 
+    def get_documentation(self):
+        cmnts = []
+        for obj in self.contents:
+            if type(obj).__name__ == 'comment':
+                cmnts.append(obj)
+            else:
+                break
+        if len(cmnts) == 0:
+            self.documentation = 'No documentation found.'
+            self.documented = False
+        else:
+            self.documentation = '\n'.join([comment.text for comment in cmnts])
+            self.documented = True
+    
+    def generate_documentation(self):
+        """
+        generate_documentation
+
+        Generate documentation for the program using the jinja2 template
 
         Returns
         -------
-        dict
-            A dictionary containing extended information about the SAS program
+        str
+            jinja2 templated version of this program
 
         """
-        return {
-            'name': os.path.splitext(os.path.basename(self.path))[0],
-            'path': self.path,
-            'lines': self.raw.count('\n'),
-            'lastEdit': "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime)),
-            'summary': dict(self.summarise_objects()),
-            'parsed': "{:.2%}".format(self.parsedRate)
-        }
-    
+
+        template = jinja2.Template(pkg_resources.read_text(templates, 'program.md'))
+        return template.render(program=self)
+
+
     def __repr__(self):
-        return os.path.basename(self.path)
+        return self.path.name
 
 
 

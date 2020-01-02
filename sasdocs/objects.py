@@ -7,6 +7,29 @@ import parsy as ps
 
 log = logging.getLogger(__name__) 
 
+def flatten_list(aList):
+    '''
+    Recursively dig through a list flattening all none list
+    objects into a single list. 
+
+    Parameters
+    ----------
+    aList : list 
+        List of nested lists and objects to be flattened
+    
+    Returns
+    -------
+    list
+        Flattened list containing all objects found in aList
+    '''
+    rt = []
+    for item in aList:
+        if not isinstance(item, list):
+            rt.append(item)
+        else:
+            rt.extend(flatten_list(item))
+    return rt
+
 
 def rebuild_macros(objs, i=0):
     '''
@@ -29,7 +52,7 @@ def rebuild_macros(objs, i=0):
     while i < len(objs):
         obj = objs[i]
         if type(obj) == macroEnd:
-            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+            return (macro(ref=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -40,7 +63,7 @@ def rebuild_macros(objs, i=0):
     return output, i
 
 
-def force_partial_parse(parser, string, stats=False):
+def force_partial_parse(parser, string, stats=False, mark=False):
     """Force partial parse of string skipping unparsable characters
     
     Parameters
@@ -56,20 +79,45 @@ def force_partial_parse(parser, string, stats=False):
     -------
     list
         parsed objects from string"""
+    if mark:
+        parser = parser.mark()
     if isinstance(string, str):
         parsed = []
         olen = len(string)
         skips = 0
+        lastPosistion = (1, 0)
+
         while len(string) > 0:
             partialParse, string = parser.parse_partial(string)
-            if len(partialParse) == 0:
+            
+            if mark:
+                start, obj, end = partialParse
+                start = [sum(x) for x in zip(start, lastPosistion)]
+                if end[0] == 0:
+                    lastPosistion = [sum(x) for x in zip(end, lastPosistion)]
+                else:
+                    lastPosistion = [end[0]+lastPosistion[0], end[1]]
+            else:
+                obj = partialParse
+
+            if obj is None:
                 string = string[1:]
                 skips += 1
+                lastPosistion = [lastPosistion[0], lastPosistion[1]+1]
             else:
-                parsed += partialParse
-        
+                if mark and not isinstance(obj,str):
+                    if isinstance(obj,list):
+                        for x in obj:
+                            x.set_found_posistion(start,lastPosistion)
+                    else:
+                        obj.set_found_posistion(start,lastPosistion)
+                
+                parsed.append(obj)
+                
+
         # print("Parsed: {:.2%}".format(1-(skips/olen)))
-        parsed = rebuild_macros(parsed)[0]
+        flattened = flatten_list(parsed)
+        parsed = rebuild_macros(flattened)[0]
         if type(parsed) == list:
             ret = [p for p in parsed if p != '\n']
         else:
@@ -94,7 +142,32 @@ def force_partial_parse(parser, string, stats=False):
 #     - include
 
 @attr.s
-class macroVariable:
+class baseSASObject:
+    """
+    Base object containing general functions used by all SAS objects
+    """
+
+    def set_found_posistion(self, start, end):
+        """
+        set_found_posistion(start, end)
+
+        Set the start and end attributes for the object. Used during 
+        force_partial_parse with mark=True to grab where in the SAS
+        program the object appears. 
+
+        Parameters
+        ----------
+        start : tuple 
+            The start line:char tuple for the object 
+        end : tuple 
+            The end line:char tuple for the objet 
+        """
+        self.start = start
+        self.end = end
+
+
+@attr.s
+class macroVariable(baseSASObject):
     """
     Abstracted python class to reference the SAS macro variable.
 
@@ -109,7 +182,7 @@ class macroVariable:
     variable = attr.ib()
 
 @attr.s
-class comment:
+class comment(baseSASObject):
     """
     Abstracted python class to reference the SAS comment.
 
@@ -130,7 +203,7 @@ class comment:
     text = attr.ib()
 
 @attr.s
-class macroVariableDefinition:
+class macroVariableDefinition(baseSASObject):
     """
     Abstracted python class for the definition and assignment of macro varaibles.
     
@@ -162,7 +235,7 @@ class macroVariableDefinition:
     value = attr.ib()
 
 @attr.s 
-class include:
+class include(baseSASObject):
     """
     Abstracted python class for %include statements in SAS code.
 
@@ -205,7 +278,7 @@ class include:
 
 
 @attr.s
-class dataArg:
+class dataArg(baseSASObject):
     """
     Abstracted python class for an argument applied to a dataset in SAS.
 
@@ -233,7 +306,7 @@ class dataArg:
 
 
 @attr.s(repr=False)
-class dataObject:
+class dataObject(baseSASObject):
     """
     Abstracted python class for data objects created and used by SAS datasteps and procedures.
 
@@ -294,7 +367,7 @@ class dataObject:
         return self.name
 
 @attr.s
-class dataStep:
+class dataStep(baseSASObject):
     """
     Abstracted python class for parsing datasteps
     
@@ -329,7 +402,7 @@ class dataStep:
     body = attr.ib(repr=False, default=None)
 
 @attr.s
-class procedure:
+class procedure(baseSASObject):
     """
     Abstracted python class for parsing procedures.
 
@@ -355,10 +428,30 @@ class procedure:
     """
     outputs = attr.ib()
     inputs = attr.ib()
-    type = attr.ib()
-    
+    type = attr.ib(default='sql')
+
+    def __attrs_post_init__(self):
+        self.outputs=flatten_list([self.outputs])
+        self.inputs=flatten_list([self.inputs])
+
+@attr.s
+class unparsedSQLStatement(baseSASObject):
+    """
+    Abstracted class for unparsed SQL statements found in
+    proc sql procedures. Only currently parsed statement is
+    `create table`, all other statements are parsed into 
+    this object
+
+    Attributes
+    ----------
+    text : str
+        Raw SQL code for unparsed statement
+    """
+
+    text = attr.ib()
+
 @attr.s 
-class libname:
+class libname(baseSASObject):
     """
     Abstracted python class for libname statements.
 
@@ -411,8 +504,17 @@ class libname:
         except Exception as e:
             log.error("Unable to resolve path: {}".format(e))
 
+    def __attrs_post_init__(self):
+        if self.path is None and self.pointer is not None:
+            self.type = 'pointer'
+        elif self.path is not None and self.pointer is None:
+            self.type = 'path'
+        
+        self.name = ''.join(self.library)
+
+
 @attr.s
-class macroStart:
+class macroStart(baseSASObject):
     """
     Flagging class for start of %macro definition
 
@@ -427,7 +529,7 @@ class macroStart:
     arguments = attr.ib()
 
 @attr.s
-class macroEnd:
+class macroEnd(baseSASObject):
     """
     Flagging class for end of %macro definition
 
@@ -440,7 +542,7 @@ class macroEnd:
 
 
 @attr.s
-class macroargument:
+class macroargument(baseSASObject):
     """
     Abstracted python class for parsing a macro argument defintion.
 
@@ -473,7 +575,7 @@ class macroargument:
     doc = attr.ib()
 
 @attr.s
-class macro:
+class macro(baseSASObject):
     """
     Abstracted python class for SAS macro.
     
@@ -501,12 +603,26 @@ class macro:
     contents : list
         List of sasdocs objects parsed within the macro
     """
-    name = attr.ib()
+    ref = attr.ib()
     arguments = attr.ib()
     contents = attr.ib(repr=False)
 
     def __attrs_post_init__(self):
+        self.name = ''.join(self.ref)
         self.contents = [obj for obj in self.contents if obj != '\n']
+        about = []
+        for obj in self.contents:
+            if type(obj).__name__ == 'comment':
+                about.append(obj)
+            else:
+                break
+        if len(about) == 0:
+            self.about = 'No docstring found.'
+            self.documented = False
+        else:
+            self.about = '\n'.join([comment.text for comment in about])
+            self.documented = True
+        
 
 
 # Parsy Objects
@@ -634,6 +750,25 @@ proc = ps.seq(
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
 
+# crtetbl: Parser for create table sql statement
+
+crtetbl = ps.seq(
+    outputs = ps.regex(r'create table', flags=reFlags) + opspc >> dataObj.sep_by(opspc+cmm+opspc) <<  opspc + ps.regex(r'as'),
+    inputs = (ps.regex(r'[^;]*?from', flags=reFlags) + spc + opspc >> dataObj.sep_by(opspc+cmm+opspc)).many(),
+    _h = ps.regex(r'[^;]*?(?=;)', flags=reFlags) + col
+).combine_dict(procedure)
+
+# unparsedSQL: Capture currently unparsed SQL statements
+
+unparsedSQL = ps.regex(r'[^;]*?;(?<!quit;)', flags=reFlags).map(unparsedSQLStatement)
+
+# sql: Abstracted proc sql statement, three primary components:
+#   - output: Output of the create table statement
+#   - inputs Any dataset referenced next to a from statement
+
+sql = ps.regex(r'proc sql', flags=reFlags) + opspc + col + opspc >> (crtetbl|unparsedSQL).sep_by(opspc) << ps.regex(r'.*?quit', flags=reFlags) + opspc + col
+
+
 # lbnm: Abstracted libname statement, three components:
 #   - library: name of library reference in code 
 #   - path: filepath of the library if given 
@@ -674,7 +809,5 @@ mcroStart = ps.seq(
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
 
 # fullprogram: multiple SAS objects including macros
-fullprogram =  (nl|mcvDef|cmnt|datastep|proc|lbnm|icld|mcroStart|mcroEnd).many()
-
-
+fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd).optional()
 
