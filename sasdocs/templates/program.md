@@ -28,7 +28,7 @@
 ## Includes
 | Path | Line | 
 | --- | --- | 
-{% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.path.as_uri()}}) | {{include.start[0]}} | 
+{% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.uri}}) | {{include.start[0]}} | 
 {% endfor %}
 {% endif %}
 
