@@ -51,7 +51,8 @@ def test_dataLine_parse(case, expected):
     assert dataLine.parse(case) == expected
 
 testcases = [
-    ("data test.test lib2.test(where=(ax=b) rename=(a=b)); format a; set test; a = 1; b = 2; output; run;", dataStep(outputs=[dataObject(library=['test'], dataset=['test'], options=None), dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')])], header=' format a; ', inputs=[dataObject(library=None, dataset=['test'], options=None)], body=' a = 1; b = 2; output; '))
+    ("data test.test lib2.test(where=(ax=b) rename=(a=b)); format a; set test; a = 1; b = 2; output; run;", dataStep(outputs=[dataObject(library=['test'], dataset=['test'], options=None), dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')])], header=' format a; ', inputs=[dataObject(library=None, dataset=['test'], options=None)], body=' a = 1; b = 2; output; ')),
+    ("data out; input a; datalines; 1; run;", dataStep(outputs=[dataObject(library=None,dataset=['out'],options=None)],inputs=None,header=None,body=' input a; datalines; 1; '))
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
@@ -130,15 +131,18 @@ def test_macroVariableDefinition_parse(case, expected):
 
 testcases = [
     ('a', macroargument(arg=['a'],default=None,doc=None)),
-    ('a=1', macroargument(arg=['a'],default=['1'],doc=None)),
-    ('a =1', macroargument(arg=['a'],default=['1'],doc=None)),
-    ('a = ', macroargument(arg=['a'],default=[],doc=None)),
-    ('a = 1', macroargument(arg=['a'],default=['1'],doc=None)),
+    ('a=1', macroargument(arg=['a'],default='1',doc=None)),
+    ('a =1', macroargument(arg=['a'],default='1',doc=None)),
+    ('a = ', macroargument(arg=['a'],default=None,doc=None)),
+    ('a = 1', macroargument(arg=['a'],default='1',doc=None)),
     ('a/*Docs*/', macroargument(arg=['a'],default=None,doc=comment(text="Docs"))),
-    ('a=1/*Docs*/', macroargument(arg=['a'],default=['1'],doc=comment(text="Docs"))),
-    ('a =1/*Docs*/', macroargument(arg=['a'],default=['1'],doc=comment(text="Docs"))),
-    ('a = /*Docs*/', macroargument(arg=['a'],default=[],doc=comment(text="Docs"))),
-    ('a = 1/*Docs*/', macroargument(arg=['a'],default=['1'],doc=comment(text="Docs"))),
+    ('a=1/*Docs*/', macroargument(arg=['a'],default='1',doc=comment(text="Docs"))),
+    ('a =1/*Docs*/', macroargument(arg=['a'],default='1',doc=comment(text="Docs"))),
+    ('a = /*Docs*/', macroargument(arg=['a'],default=None,doc=comment(text="Docs"))),
+    ('a = 1/*Docs*/', macroargument(arg=['a'],default='1',doc=comment(text="Docs"))),
+    ('a = a.b@c.com/*Email*/', macroargument(arg=['a'],default='a.b@c.com',doc=comment(text="Email"))),
+    ('a = //path/to/file/*Fpath*/', macroargument(arg=['a'],default='//path/to/file',doc=comment(text="Fpath"))),
+    ('a = C:/path/to/file/*Fpath*/', macroargument(arg=['a'],default='C:/path/to/file',doc=comment(text="Fpath"))),
 ]
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macroargument_parse(case, expected):
@@ -147,21 +151,21 @@ def test_macroargument_parse(case, expected):
 
 testcases = [
     ('(a, b, c)', [macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)]),
-    ('(a=1, b)', [macroargument(arg=['a'],default=['1'],doc=None), macroargument(arg=['b'],default=None,doc=None)]),
-    ('(a=1, b=2)', [macroargument(arg=['a'],default=['1'],doc=None), macroargument(arg=['b'],default=['2'],doc=None)]),
-    ('(a=1/*Doc A*/,b=2)', [macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=['2'],doc=None)]),
-    ('(a=1/*Doc A*/,b/*Doc B*/)', [macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))]),
+    ('(a=1, b)', [macroargument(arg=['a'],default='1',doc=None), macroargument(arg=['b'],default=None,doc=None)]),
+    ('(a=1, b=2)', [macroargument(arg=['a'],default='1',doc=None), macroargument(arg=['b'],default='2',doc=None)]),
+    ('(a=1/*Doc A*/,b=2)', [macroargument(arg=['a'],default='1',doc=comment(text="Doc A")), macroargument(arg=['b'],default='2',doc=None)]),
+    ('(a=1/*Doc A*/,b/*Doc B*/)', [macroargument(arg=['a'],default='1',doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))]),
 ]
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macroargumentLine_parse(case, expected):
     assert mcroargline.parse(case) == expected
 
 testcases = [
-    ('%macro test; %mend;', macro(ref=['test'], arguments=None, contents='')),
-    ('%macro test(a, b, c); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents='')),
-    ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents='')),
-    ('%macro test; data a; set b; run; %mend;', macro(ref=['test'], arguments=None, contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),                                                                    
-    ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'], default=['1'], doc=comment(text='Doc A')), macroargument(arg=['b'], default=None, doc=comment(text='Doc B'))], contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),
+    ('%macro test; %mend;', macro(name=['test'], arguments=None, contents='')),
+    ('%macro test(a, b, c); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents='')),
+    ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default='1',doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents='')),
+    ('%macro test; data a; set b; run; %mend;', macro(name=['test'], arguments=None, contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),                                                                    
+    ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'], default='1', doc=comment(text='Doc A')), macroargument(arg=['b'], default=None, doc=comment(text='Doc B'))], contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)

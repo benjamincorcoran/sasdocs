@@ -634,7 +634,7 @@ reFlags = re.IGNORECASE|re.DOTALL
 # regex objects
 
 # Word: 1 or more alphanumeric characters
-wrd = ps.regex(r'[a-zA-Z0-9_-]+')
+wrd = ps.regex(r'[a-zA-Z0-9_\-]+')
 # FilePath: String terminating in a quote (used only for include and libname)
 fpth = ps.regex(r'[^\'"]+')
 
@@ -649,14 +649,13 @@ opdot = ps.string('.').optional().map(lambda x: '' if x is None else x)
 # Common identifiers
 nl = ps.string('\n')
 eq = ps.string('=')
-col = ps.string(';')
+col = ps.string(';') 
 amp = ps.string('&')
 lb = ps.string('(')
 rb = ps.string(')')
 star = ps.string('*')
 cmm = ps.string(',')
 
-anycharacter = ps.regex(r'.', flags=reFlags)
 
 # Multiline comment entry and exit points
 comstart = ps.string(r'/*')
@@ -728,8 +727,8 @@ dataLine = dataObj.sep_by(spc)
 
 datastep = ps.seq(
     outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine << col,
-    header = ps.regex(r'.*?(?=set|merge)', flags=reFlags),
-    inputs = (opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col,
+    header = (ps.regex(r'.*?(?=set|merge)', flags=reFlags)).optional(),
+    inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col).optional(),
     body = ps.regex(r'.*?(?=run)', flags=reFlags),
     _run = run + opspc + col
 ).combine_dict(dataStep)
@@ -792,14 +791,11 @@ program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
-    default = (eq + opspc >> sasName).optional(),
+    default = (eq + opspc >> ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+').optional()).optional(),
     doc = cmnt.optional()
 ).combine_dict(macroargument)
 
 mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
-
-
-
 
 mcroStart = ps.seq(
     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
