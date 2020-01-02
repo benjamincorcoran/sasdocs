@@ -51,8 +51,8 @@ def rebuild_macros(objs, i=0):
     output = []
     while i < len(objs):
         obj = objs[i]
-        if type(obj) == macroEnd:
-            return (macro(ref=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+        if len(output) > 0 and type(output[0]) == macroStart and type(obj) == macroEnd:
+            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -255,6 +255,7 @@ class include(baseSASObject):
 
     """
     path = attr.ib()
+    uri = ''
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
@@ -272,9 +273,10 @@ class include(baseSASObject):
         None
         """
         try:
-            self.path = pathlib.Path(value).resolve()
+            self.path = pathlib.Path(value).resolve(strict=True)
+            self.uri = self.path.as_uri()
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            log.warning("Unable to directly resolve path: {}".format(e))
 
 
 @attr.s
@@ -482,6 +484,11 @@ class libname(baseSASObject):
     library = attr.ib()
     path = attr.ib()
     pointer = attr.ib(default=None)
+
+    uri = ''
+    is_path = False
+    is_pointer = False
+
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
@@ -500,9 +507,19 @@ class libname(baseSASObject):
         """
         try:
             if self.path is not None:
-                self.path = pathlib.Path(value).resolve()
+                self.path = pathlib.Path(value).resolve(strict=True)
+                self.uri = self.path.as_uri()
+                self.is_path = True
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            self.is_path = True
+            log.warning("Unable to directly resolve path: {}".format(e))
+    
+    def __attrs_post_init__(self):
+        if self.path is None and self.pointer is not None:
+            self.is_pointer = True
+        
+
+
 
     def __attrs_post_init__(self):
         if self.path is None and self.pointer is not None:
