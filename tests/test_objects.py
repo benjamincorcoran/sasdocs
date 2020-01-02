@@ -123,6 +123,9 @@ testcases = [
     ('a =1/*Docs*/', macroargument(arg=['a'],default='1',doc=comment(text="Docs"))),
     ('a = /*Docs*/', macroargument(arg=['a'],default=None,doc=comment(text="Docs"))),
     ('a = 1/*Docs*/', macroargument(arg=['a'],default='1',doc=comment(text="Docs"))),
+    ('a = a.b@c.com/*Email*/', macroargument(arg=['a'],default='a.b@c.com',doc=comment(text="Email"))),
+    ('a = //path/to/file/*Fpath*/', macroargument(arg=['a'],default='//path/to/file',doc=comment(text="Fpath"))),
+    ('a = C:/path/to/file/*Fpath*/', macroargument(arg=['a'],default='C:/path/to/file',doc=comment(text="Fpath"))),
 ]
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macroargument_parse(case, expected):
