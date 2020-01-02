@@ -51,7 +51,7 @@ def rebuild_macros(objs, i=0):
     output = []
     while i < len(objs):
         obj = objs[i]
-        if type(obj) == macroEnd:
+        if len(output) > 0 and type(output[0]) == macroStart and type(obj) == macroEnd:
             return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
