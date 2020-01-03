@@ -624,12 +624,17 @@ class macro(baseSASObject):
             else:
                 break
         if len(about) == 0:
-            self.about = 'No docstring found.'
+            self.rawAbout = 'No docstring found.'
             self.documented = False
         else:
-            self.about = '\n'.join([comment.text for comment in about])
+            self.rawAbout = '\n'.join([comment.text for comment in about])
             self.documented = True
         
+        self.about = re.sub(r'[^A-Za-z0-9\s]','',self.rawAbout,)
+        self.about = re.sub(r'^\s+','',self.about,flags=reFlags)
+        self.shortDesc = self.about[:200] + '...' if len(self.about) > 200 else self.about
+        self.shortDesc = re.sub(r'\t|\n',' ',self.shortDesc) 
+        self.shortDesc = re.sub(r'\s+',' ',self.shortDesc)       
 
 
 # Parsy Objects
