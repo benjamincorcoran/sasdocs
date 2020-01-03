@@ -276,6 +276,7 @@ class include(baseSASObject):
             self.path = pathlib.Path(value).resolve(strict=True)
             self.uri = self.path.as_uri()
         except Exception as e:
+            self.path = pathlib.Path(value)
             log.warning("Unable to directly resolve path: {}".format(e))
 
 
