@@ -17,7 +17,7 @@
 {% endfor %}
 
 ## Libraries
-| Library | Path | 
+| Library | Path/Pointer | 
 | --- | --- | 
-{% for library in project.get_objects(objectType='libname') %}| {{library.name}} | [{{library.path}}]({{library.uri}}) |
+{% for library in project.get_objects(objectType='libname') %}| {{library.name}} | {%if library.path is none%}[{{library.path}}]({{library.uri}}) {%else%} {{library.pointer}} {%endif%} |
 {% endfor %}
