@@ -83,7 +83,7 @@ class sasProject(object):
             self.logger.error("Unable to add programs to project: {}".format(e))
             return False
         
-        self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
+        # self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
         
     def add_programs_to_project(self, programPaths):
         """
@@ -226,7 +226,7 @@ class sasProject(object):
             'macroIndex' : mdFiles['macroIndex'].render(project=self)
         }
 
-        self.documentation['programs']  = {program.path.relative_to(self.path): program.generate_documentation() for program in self.programs}
+        self.documentation['programs']  = {program.path: program.generate_documentation() for program in self.programs}
 
         if outputDirectory is not None:
             out = pathlib.Path(outputDirectory)
