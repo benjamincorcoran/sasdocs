@@ -630,7 +630,7 @@ class macro(baseSASObject):
             self.rawAbout = '\n'.join([comment.text for comment in about])
             self.documented = True
         
-        self.about = re.sub(r'[^A-Za-z0-9\s]','',self.rawAbout,)
+        self.about = re.sub(r'[^A-Za-z0-9\.\s]','',self.rawAbout,)
         self.about = re.sub(r'^\s+','',self.about,flags=reFlags)
         self.shortDesc = self.about[:200] + '...' if len(self.about) > 200 else self.about
         self.shortDesc = re.sub(r'\t|\n',' ',self.shortDesc) 
