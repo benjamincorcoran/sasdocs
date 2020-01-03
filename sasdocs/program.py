@@ -158,6 +158,7 @@ class sasProgram(object):
         """
         
         self.name = self.path.stem
+        self.nameURL = self.name.replace(' ','%20')
         self.lines = self.raw.count('\n')
         self.lastEdit = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
         self.summary = dict(self.summarise_objects())
