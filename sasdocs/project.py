@@ -67,7 +67,7 @@ class sasProject(object):
             log.error("Unable to add programs to project: {}".format(e))
             return False
         
-        self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
+        # self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
         
     def add_programs_to_project(self, programPaths):
         """
