@@ -308,7 +308,7 @@ class dataArg(baseSASObject):
         Value passed to the inline data argument
     """
     option = attr.ib()
-    setting = attr.ib(default=None, repr=False)
+    setting = attr.ib(default=None, repr=True)
 
 
 @attr.s(repr=False)
@@ -734,8 +734,17 @@ datalineArg = ps.seq(
     setting = lb + ps.regex(r'[^)]*') + rb
 ).combine_dict(dataArg)
 
+# datalineArg: Argument in dataline sasName = sasName sasName sasName...
+# e.g. keep=A B C 
+datalineArgNB = ps.seq(
+    option = sasName << (opspc + eq + opspc), 
+    setting = ps.regex(r'.*?(?=\s+\w+\s*=)|.*?(?=\))')
+).combine_dict(dataArg)
+
+
 # datalineOptions: Seperate multiple datalineArgs by spaces
-datalineOptions = lb >> (datalineArg|sasName).sep_by(spc) << rb
+datalineOptions = lb >> (datalineArg|datalineArgNB|sasName).sep_by(spc) << rb
+
 
 # dataObj: Abstracted data object exists as three components:
 #   - library: sasName before . if . exists
