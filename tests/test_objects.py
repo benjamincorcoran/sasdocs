@@ -35,8 +35,14 @@ def test_dataObject_parse(case, expected):
     assert dataObj.parse(case) == expected
 
 testcases = [
-    ("(where=(1=1))", [dataArg(option=['where'], setting='(1=1)')])
+    ("(where=(1=1))", [dataArg(option=['where'], setting='(1=1)')]),
+    ("(drop=a)",[dataArg(option=['drop'], setting='a')]),
+    ("(drop=a b c d)",[dataArg(option=['drop'], setting='a b c d')]),
+    ("(where=(1=1) drop=a)",[dataArg(option=['where'], setting='(1=1)'), dataArg(option=['drop'], setting='a')]),
+    ("(drop=a where=(1=1))",[dataArg(option=['drop'], setting='a'), dataArg(option=['where'], setting='(1=1)')]),
+    ("(drop=a b c where=(1=1))",[dataArg(option=['drop'], setting='a b c'), dataArg(option=['where'], setting='(1=1)')])
 ]
+
 
 @pytest.mark.parametrize("case,expected", testcases)
 def test_dataLineOption_parse(case, expected):
