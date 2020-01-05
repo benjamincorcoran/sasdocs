@@ -273,11 +273,13 @@ class include(baseSASObject):
         None
         """
         try:
-            self.path = pathlib.Path(value).resolve(strict=True)
-            self.uri = self.path.as_uri()
+            path = pathlib.Path(value).resolve(strict=True)
         except Exception as e:
-            self.path = pathlib.Path(value)
+            path = pathlib.Path(value)
             log.warning("Unable to directly resolve path: {}".format(e))
+        
+        self.path = path
+        
 
 
 @attr.s
@@ -486,7 +488,6 @@ class libname(baseSASObject):
     path = attr.ib()
     pointer = attr.ib(default=None)
 
-    uri = ''
     is_path = False
     is_pointer = False
 
@@ -505,15 +506,23 @@ class libname(baseSASObject):
         Returns
         -------
         None
-        """
-        try:
-            if self.path is not None:
-                self.path = pathlib.Path(value).resolve(strict=True)
-                self.uri = self.path.as_uri()
-                self.is_path = True
-        except Exception as e:
+        """      
+        
+        if self.path is not None:
             self.is_path = True
-            log.warning("Unable to directly resolve path: {}".format(e))
+            try:
+                path = pathlib.Path(value).resolve(strict=True)
+                uri = path.as_uri()
+            except Exception as e:
+                path = pathlib.Path(value)
+                uri = pathlib.Path(value)
+                log.warning("Unable to directly resolve path: {}".format(e))
+        else:
+            path = None
+            uri = ''
+
+        self.path = path
+        self.uri = uri
     
     def __attrs_post_init__(self):
         if self.path is None and self.pointer is not None:
