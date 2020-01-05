@@ -724,8 +724,15 @@ datalineArg = ps.seq(
     setting = lb + ps.regex(r'[^)]*') + rb
 ).combine_dict(dataArg)
 
+# datalineArg: Argument in dataline sasName = sasName sasName sasName...
+# e.g. keep=A B C 
+datalineArgNB = ps.seq(
+    option = sasName << (opspc + eq + opspc), 
+    setting = sasName.sep_by(spc) 
+).combine_dict(dataArg)
+
 # datalineOptions: Seperate multiple datalineArgs by spaces
-datalineOptions = lb >> (datalineArg|sasName).sep_by(spc) << rb
+datalineOptions = lb >> (datalineArg|datalineArgNB|sasName).sep_by(spc) << rb
 
 # dataObj: Abstracted data object exists as three components:
 #   - library: sasName before . if . exists
