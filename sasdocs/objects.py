@@ -546,6 +546,7 @@ class macroStart(baseSASObject):
     """
     name = attr.ib()
     arguments = attr.ib()
+    options = attr.ib(default=None)
 
 @attr.s
 class macroEnd(baseSASObject):
