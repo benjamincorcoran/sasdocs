@@ -5,9 +5,10 @@ before_install:
   - python --version
   - pip install -U pip
   - pip install -U pytest
+  - pip install -U pytest-cov
   - pip install -U coveralls 
 install:
   - pip install .
-script: coverage run --omit=*tests/* -m pytest
+script: py.test --cov-config=.coveragerc --cov
 after_success:
   - coveralls 
