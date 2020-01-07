@@ -12,5 +12,5 @@ script:
   - pytest
   - coverage run -m pytest ./tests
   - coverage report 
-  after_success:
+after_success:
   - coveralls 
