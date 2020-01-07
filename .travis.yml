@@ -11,5 +11,6 @@ install:
 script: 
   - pytest
   - coverage run --omit=*/tests* --omit=*/site-packages* -m pytest ./tests
-after_success:
+  - coverage report
+  after_success:
   - coveralls 
