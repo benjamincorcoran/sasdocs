@@ -170,7 +170,8 @@ def test_macroargumentLine_parse(case, expected):
 
 testcases = [
     ('%macro test;', macroStart(name=['test'], arguments=None, options=None)),
-    ('%macro test /des="Description";', macroStart(name=['test'], arguments=None, options=[dataArg(option='des',setting='Description')]))
+    ('%macro test /des="Description";', macroStart(name=['test'], arguments=None, options=[dataArg(option=['des'],setting='Description')])),
+    ('%macro test /strict des="Description";', macroStart(name=['test'], arguments=None, options=[['strict'], dataArg(option=['des'],setting='Description')]))
 
 ]
 @pytest.mark.parametrize("case,expected", testcases)
