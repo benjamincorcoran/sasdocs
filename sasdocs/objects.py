@@ -52,7 +52,7 @@ def rebuild_macros(objs, i=0):
     while i < len(objs):
         obj = objs[i]
         if len(output) > 0 and type(output[0]) == macroStart and type(obj) == macroEnd:
-            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+            return (macro(name=output[0].name, arguments=output[0].arguments, options=output[0].options, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -626,6 +626,7 @@ class macro(baseSASObject):
     name = attr.ib()
     arguments = attr.ib()
     contents = attr.ib(repr=False)
+    options = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         self.contents = [obj for obj in self.contents if obj != '\n']
