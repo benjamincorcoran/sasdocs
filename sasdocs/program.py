@@ -11,7 +11,12 @@ log = logging.getLogger(__name__)
 class sasProgram(object):
     """
     Abstracted SAS program class.
-    ...
+    
+    This class represents a .sas program file. Initialised with a valid file path 
+    to the .sas file, the parser will then parse any valid SAS object it can find 
+    within the file and return them to a list in the contents attribute. 
+
+    The percentage of complete parsing will also be stored in the parsedRate attribute. 
 
     Attributes
     ----------

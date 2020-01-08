@@ -3,7 +3,3 @@
 
 ## Summary 
 
-| Type | Count |
-| --- | ---: | 
-{% for key, value in program.get_extended_info().summary.items() %}| {{key}} | {{value}} | 
-{% endfor %}

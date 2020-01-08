@@ -100,6 +100,11 @@ Macro Argument
 Functions
 ---------
 
+flatten_list
+^^^^^^^^^^^^
+
+.. autofunction:: sasdocs.objects.flatten_list
+
 rebuild_macros
 ^^^^^^^^^^^^^^
 .. autofunction:: sasdocs.objects.rebuild_macros
