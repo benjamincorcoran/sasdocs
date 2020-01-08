@@ -167,6 +167,19 @@ testcases = [
 def test_macroargumentLine_parse(case, expected):
     assert mcroargline.parse(case) == expected
 
+
+testcases = [
+    ('%macro test;', macroStart(name=['test'], arguments=None, options=None)),
+    ('%macro test /des="Description";', macroStart(name=['test'], arguments=None, options=[dataArg(option=['des'],setting='Description')])),
+    ('%macro test /strict des="Description";', macroStart(name=['test'], arguments=None, options=[['strict'], dataArg(option=['des'],setting='Description')]))
+
+]
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_start_parse(case, expected):
+    assert mcroStart.parse(case) == expected
+
+
+
 testcases = [
     ('%macro test; %mend;', macro(name=['test'], arguments=None, contents='')),
     ('%macro test(a, b, c); %mend;', macro(name=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents='')),
@@ -189,6 +202,17 @@ testcases = [
 def test_macro_about_parse(case, expected):
     macro = force_partial_parse(fullprogram,case)[0]
     assert macro.about == expected
+
+testcases = [
+    ('%macro test; /*This is the test macro*/ %mend;', None),
+    ('%macro test /strict; /*This is the test macro*/\n/*This is the second line*/%mend;', [['strict']]),
+    ('%macro test /strict des="Description"; data a; set b; run; /*This is the test macro*/ %mend;', [['strict'], dataArg(option=['des'],setting='Description')]),
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_options_parse(case, expected):
+    macro = force_partial_parse(fullprogram,case)[0]
+    assert macro.options == expected
 
 testcases = [
     ('%macro test; data a; set b; run; %mend;', [dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')]),

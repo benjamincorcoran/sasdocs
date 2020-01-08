@@ -52,7 +52,7 @@ def rebuild_macros(objs, i=0):
     while i < len(objs):
         obj = objs[i]
         if len(output) > 0 and type(output[0]) == macroStart and type(obj) == macroEnd:
-            return (macro(name=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+            return (macro(name=output[0].name, arguments=output[0].arguments, options=output[0].options, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -546,6 +546,7 @@ class macroStart(baseSASObject):
     """
     name = attr.ib()
     arguments = attr.ib()
+    options = attr.ib(default=None)
 
 @attr.s
 class macroEnd(baseSASObject):
@@ -625,6 +626,7 @@ class macro(baseSASObject):
     name = attr.ib()
     arguments = attr.ib()
     contents = attr.ib(repr=False)
+    options = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         self.contents = [obj for obj in self.contents if obj != '\n']
@@ -678,6 +680,7 @@ lb = ps.string('(')
 rb = ps.string(')')
 star = ps.string('*')
 cmm = ps.string(',')
+fs = ps.string('/')
 
 
 # Multiline comment entry and exit points
@@ -721,7 +724,7 @@ mcvDef = ps.seq(
 # e.g. where=(1=1)
 datalineArg = ps.seq(
     option = sasName << (opspc + eq + opspc), 
-    setting = lb + ps.regex(r'[^)]*') + rb
+    setting = lb + ps.regex(r'[^)]*',flags=reFlags) + rb
 ).combine_dict(dataArg)
 
 # datalineArg: Argument in dataline sasName = sasName sasName sasName...
@@ -731,9 +734,13 @@ datalineArgNB = ps.seq(
     setting = ps.regex(r'.*?(?=\s+\w+\s*=)|.*?(?=\))')
 ).combine_dict(dataArg)
 
+datalineArgPt = ps.seq(
+    option = sasName << (opspc + eq + opspc),
+    setting = opspc + qte >> fpth << opspc + qte
+).combine_dict(dataArg)
 
 # datalineOptions: Seperate multiple datalineArgs by spaces
-datalineOptions = lb >> (datalineArg|datalineArgNB|sasName).sep_by(spc) << rb
+datalineOptions = lb >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc) << rb
 
 
 # dataObj: Abstracted data object exists as three components:
@@ -831,7 +838,9 @@ mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
 
 mcroStart = ps.seq(
     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
-    arguments = (opspc >> mcroargline).optional() << opspc + col 
+    arguments = (opspc >> mcroargline).optional(), 
+    options = (opspc + fs + opspc >> (datalineArg|datalineArgPt|sasName).sep_by(spc)).optional(),
+    _col = opspc + col 
 ).combine_dict(macroStart)
 
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
