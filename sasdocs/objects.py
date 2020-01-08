@@ -555,6 +555,7 @@ class macroStart(baseSASObject):
     """
     name = attr.ib()
     arguments = attr.ib()
+    options = attr.ib(default=None)
 
 @attr.s
 class macroEnd(baseSASObject):
@@ -688,6 +689,7 @@ lb = ps.string('(')
 rb = ps.string(')')
 star = ps.string('*')
 cmm = ps.string(',')
+fs = ps.string('/')
 
 
 # Multiline comment entry and exit points
@@ -731,7 +733,7 @@ mcvDef = ps.seq(
 # e.g. where=(1=1)
 datalineArg = ps.seq(
     option = sasName << (opspc + eq + opspc), 
-    setting = lb + ps.regex(r'[^)]*') + rb
+    setting = lb + ps.regex(r'[^)]*',flags=reFlags) + rb
 ).combine_dict(dataArg)
 
 # datalineArg: Argument in dataline sasName = sasName sasName sasName...
@@ -741,9 +743,13 @@ datalineArgNB = ps.seq(
     setting = ps.regex(r'.*?(?=\s+\w+\s*=)|.*?(?=\))')
 ).combine_dict(dataArg)
 
+datalineArgPt = ps.seq(
+    option = sasName << (opspc + eq + opspc),
+    setting = opspc + qte >> fpth << opspc + qte
+).combine_dict(dataArg)
 
 # datalineOptions: Seperate multiple datalineArgs by spaces
-datalineOptions = lb >> (datalineArg|datalineArgNB|sasName).sep_by(spc) << rb
+datalineOptions = lb >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc) << rb
 
 
 # dataObj: Abstracted data object exists as three components:
@@ -841,7 +847,9 @@ mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
 
 mcroStart = ps.seq(
     name = ps.regex(r'%macro',flags=re.IGNORECASE) + spc + opspc >> sasName,
-    arguments = (opspc >> mcroargline).optional() << opspc + col 
+    arguments = (opspc >> mcroargline).optional(), 
+    options = (opspc + fs + opspc >> (datalineArg|datalineArgPt|sasName).sep_by(spc)).optional(),
+    _col = opspc + col 
 ).combine_dict(macroStart)
 
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
