@@ -160,6 +160,6 @@ class sasProject(object):
         objSum, prgSum = self.summarise_project()
         
         self.name = os.path.basename(self.path)
-        self.programs = len(self.programs)
+        self.nPrograms = len(self.programs)
         self.summary = dict(objSum)
         self.objects = dict(prgSum)

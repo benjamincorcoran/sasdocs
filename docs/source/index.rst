@@ -6,6 +6,7 @@ sasdocs
    :caption: Contents:
 
    installation
+   usage
    objects
 
 
