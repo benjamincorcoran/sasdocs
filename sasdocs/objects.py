@@ -52,7 +52,7 @@ def rebuild_macros(objs, i=0):
     while i < len(objs):
         obj = objs[i]
         if len(output) > 0 and type(output[0]) == macroStart and type(obj) == macroEnd:
-            return (macro(ref=output[0].name, arguments=output[0].arguments, contents=output[1:]), i)
+            return (macro(name=output[0].name, arguments=output[0].arguments, options=output[0].options, contents=output[1:]), i)
         elif type(obj) != macroStart or (type(obj) == macroStart and len(output)==0) :
             output.append(obj)
         else:
@@ -635,6 +635,7 @@ class macro(baseSASObject):
     ref = attr.ib()
     arguments = attr.ib()
     contents = attr.ib(repr=False)
+    options = attr.ib(default=None)
 
     def __attrs_post_init__(self):
         self.name = ''.join(self.ref)
@@ -657,6 +658,33 @@ class macro(baseSASObject):
         self.shortDesc = self.about[:200] + '...' if len(self.about) > 200 else self.about
         self.shortDesc = re.sub(r'\t|\n',' ',self.shortDesc) 
         self.shortDesc = re.sub(r'\s+',' ',self.shortDesc)       
+
+
+@attr.s
+class macroCall(baseSASObject):
+    """
+    Abstracted python class for SAS macro call.
+    
+    This class parses a SAS macro call. 
+
+    .. code-block:: sas
+
+        %runMacro;
+        
+        /*and*/
+
+        %runMacro(arg1=A);
+
+
+    Attributes
+    ----------
+    name : str 
+        Name of the marco
+    arguments : list, optional
+        List of macroarguments parsed from the macro defintion
+    """
+    name = attr.ib()
+    arguments = attr.ib()
 
 
 # Parsy Objects
@@ -854,6 +882,12 @@ mcroStart = ps.seq(
 
 mcroEnd = (ps.regex(r'%mend.*?;',flags=re.IGNORECASE)).map(macroEnd)
 
+mcroCall = ps.seq(
+    name = ps.regex(r'%') >> sasName,
+    arguments = (opspc >> mcroargline).optional(),
+    _col = opspc + col
+).combine_dict(macroCall)
+
 # fullprogram: multiple SAS objects including macros
-fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd).optional()
+fullprogram =  (nl|mcvDef|cmnt|datastep|proc|sql|lbnm|icld|mcroStart|mcroEnd|mcroCall).optional()
 
