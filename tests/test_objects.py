@@ -167,6 +167,19 @@ testcases = [
 def test_macroargumentLine_parse(case, expected):
     assert mcroargline.parse(case) == expected
 
+
+testcases = [
+    ('%macro test;', macroStart(name=['test'], arguments=None, options=None)),
+    ('%macro test /des="Description";', macroStart(name=['test'], arguments=None, options=[dataArg(option=['des'],setting='Description')])),
+    ('%macro test /strict des="Description";', macroStart(name=['test'], arguments=None, options=[['strict'], dataArg(option=['des'],setting='Description')]))
+
+]
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_start_parse(case, expected):
+    assert mcroStart.parse(case) == expected
+
+
+
 testcases = [
     ('%macro test; %mend;', macro(ref=['test'], arguments=None, contents='')),
     ('%macro test(a, b, c); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=None,doc=None), macroargument(arg=['b'],default=None,doc=None), macroargument(arg=['c'],default=None,doc=None)], contents='')),
@@ -191,6 +204,17 @@ def test_macro_about_parse(case, expected):
     assert macro.about == expected
 
 testcases = [
+    ('%macro test; /*This is the test macro*/ %mend;', None),
+    ('%macro test /strict; /*This is the test macro*/\n/*This is the second line*/%mend;', [['strict']]),
+    ('%macro test /strict des="Description"; data a; set b; run; /*This is the test macro*/ %mend;', [['strict'], dataArg(option=['des'],setting='Description')]),
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_options_parse(case, expected):
+    macro = force_partial_parse(fullprogram,case)[0]
+    assert macro.options == expected
+
+testcases = [
     ('%macro test; data a; set b; run; %mend;', [dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')]),
     ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', [dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library='work', dataset=['b'])], body=' ')]),
 ]
@@ -198,6 +222,18 @@ testcases = [
 @pytest.mark.parametrize("case,expected", testcases)
 def test_macro_children_parse(case, expected):
     assert force_partial_parse(fullprogram, case)[0].contents == expected
+
+
+testcases = [
+    (r'%runMacro;',macroCall(name=['runMacro'], arguments=None)),
+    (r"%runMacro(A=B, C=D);",macroCall(name=['runMacro'], arguments=[macroargument(arg=['A'],default=["B"],doc=None),macroargument(arg=['C'],default=["D"],doc=None)]))
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_call_parse(case, expected):
+    assert mcroCall.parse(case) == expected
+
+
 
 
 testcases = [("""
