@@ -41,6 +41,8 @@ class sasProject(object):
         self.programs = []
         if self.load_project(path) is False:
             return None
+        
+        self.get_extended_info()
 
     def load_project(self, path):
         """
@@ -74,7 +76,7 @@ class sasProject(object):
             self.logger.error("Unable to add programs to project: {}".format(e))
             return False
         
-        self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
+        # self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
         
     def add_programs_to_project(self, programPaths):
         """
@@ -153,7 +155,7 @@ class sasProject(object):
         """
         get_extended_info
 
-        Creates dictionary containing extended information about the parsed SAS code. 
+        Creates class attributes for information about the SAS project. 
         
         .. code-block:: rst
 
@@ -163,22 +165,10 @@ class sasProject(object):
             summary : Counter object returned by summarise_objects,
             objects : Dictionary of Counter objects indexed by program 
             
-        Returns
-        -------
-        dict
-            A dictionary containing extended information about the SAS program
-
         """
         objSum, prgSum = self.summarise_project()
-        return {
-            'name': os.path.basename(self.path),
-            'path': self.path,
-            'programs': len(self.programs),
-            'summary': dict(objSum),
-            'objects': dict(prgSum)
-        }
-                
-                
-
-
-
+        
+        self.name = os.path.basename(self.path)
+        self.nPrograms = len(self.programs)
+        self.summary = dict(objSum)
+        self.objects = dict(prgSum)
