@@ -224,6 +224,18 @@ def test_macro_children_parse(case, expected):
     assert force_partial_parse(fullprogram, case)[0].contents == expected
 
 
+testcases = [
+    (r'%runMacro;',macroCall(name=['runMacro'], arguments=None)),
+    (r"%runMacro(A=B, C=D);",macroCall(name=['runMacro'], arguments=[macroargument(arg=['A'],default=["B"],doc=None),macroargument(arg=['C'],default=["D"],doc=None)]))
+]
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_macro_call_parse(case, expected):
+    assert mcroCall.parse(case) == expected
+
+
+
+
 testcases = [("""
 libname a "path/to/folder";
 %let a = 1;
