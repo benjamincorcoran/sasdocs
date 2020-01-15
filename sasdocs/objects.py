@@ -406,6 +406,7 @@ class dataStep(baseSASObject):
     inputs = attr.ib()
     header = attr.ib(repr=False, default=None)
     body = attr.ib(repr=False, default=None)
+    options = attr.ib(default=None)
 
 @attr.s
 class procedure(baseSASObject):
@@ -738,7 +739,7 @@ cmnt = (inlinecmnt|multicmnt).map(comment)
 
 # Complex SAS Objects
 # sasName: Any named object in SAS, can contain macrovariable as part of name
-sasName = (wrd|mcv).many()
+sasName = (wrd|mcv).at_least(1)
 
 # Marcovariable definition:
 mcvDef = ps.seq(
@@ -758,7 +759,7 @@ datalineArg = ps.seq(
 # e.g. keep=A B C 
 datalineArgNB = ps.seq(
     option = sasName << (opspc + eq + opspc), 
-    setting = ps.regex(r'.*?(?=\s+\w+\s*=)|.*?(?=\))')
+    setting = ps.regex(r'.*?(?=\s+\w+\s*=)|.*?(?=\))|.*?(?=;)')
 ).combine_dict(dataArg)
 
 datalineArgPt = ps.seq(
@@ -777,7 +778,7 @@ datalineOptions = lb >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by
 
 dataObj = ps.seq(
     library = (sasName << dot).optional(),
-    dataset = dot >> sasName | sasName,
+    dataset = (dot >> sasName) | sasName,
     options = datalineOptions.optional()
 ).combine_dict(dataObject)
 
@@ -792,7 +793,9 @@ dataLine = dataObj.sep_by(spc)
 # terminating run is thrown away
 
 datastep = ps.seq(
-    outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine << col,
+    outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine,
+    options = (opspc + fs + opspc >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc)).optional(), 
+    _col = opspc + col,
     header = (ps.regex(r'(?:(?!run).)*(?=set|merge)', flags=reFlags)).optional(),
     inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col).optional(),
     body = ps.regex(r'.*?(?=run)', flags=reFlags),
