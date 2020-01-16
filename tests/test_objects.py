@@ -58,8 +58,10 @@ def test_dataLine_parse(case, expected):
 
 testcases = [
     ("data test.test lib2.test(where=(ax=b) rename=(a=b)); format a; set test; a = 1; b = 2; output; run;", dataStep(outputs=[dataObject(library=['test'], dataset=['test'], options=None), dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')])], header=' format a; ', inputs=[dataObject(library=None, dataset=['test'], options=None)], body=' a = 1; b = 2; output; ')),
-    ("data out; input a; datalines; 1; run;", dataStep(outputs=[dataObject(library=None,dataset=['out'],options=None)],inputs=None,header=None,body=' input a; datalines; 1; '))
+    ("data out; input a; datalines; 1; run;", dataStep(outputs=[dataObject(library=None,dataset=['out'],options=None)],inputs=None,header=None,body=' input a; datalines; 1; ')),
+    ("data out /view=out; set in; run;", dataStep(options=[dataArg(option=['view'], setting='out')], outputs=[dataObject(library=None, dataset=['out'], options=None)], inputs=[dataObject(library=None, dataset=['in'], options=None)], header=" ", body=" "))
 ]
+
 
 @pytest.mark.parametrize("case,expected", testcases)
 def test_dataStep_parse(case, expected):
