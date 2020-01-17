@@ -5,7 +5,7 @@ import attr
 import re
 import parsy as ps
 
-log = logging.getLogger(__name__) 
+from . import format_logger
 
 def flatten_list(aList):
     '''
@@ -147,6 +147,8 @@ class baseSASObject:
     """
     Base object containing general functions used by all SAS objects
     """
+    log = format_logger(logging.getLogger(__name__),{},logFormat='object')
+
 
     def set_found_posistion(self, start, end):
         """
@@ -277,7 +279,7 @@ class include(baseSASObject):
             path = pathlib.Path(value).resolve(strict=True)
         except Exception as e:
             path = pathlib.Path(value)
-            log.warning("Unable to directly resolve path: {}".format(e))
+            self.log.warning("Unable to directly resolve path: {}".format(e))
         
         self.path = path
         
@@ -517,7 +519,7 @@ class libname(baseSASObject):
             except Exception as e:
                 path = pathlib.Path(value)
                 uri = pathlib.Path(value)
-                log.warning("Unable to directly resolve path: {}".format(e))
+                self.log.warning("Unable to directly resolve path: {}".format(e))
         else:
             path = None
             uri = ''
