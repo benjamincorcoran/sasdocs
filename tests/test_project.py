@@ -31,8 +31,8 @@ testcases = [
 #     assert [prg.name for prg in res.programs] == expected['names']
 
 
-# @pytest.mark.parametrize("case,expected", testcases)
-# def test_project_get_objects(case,expected):
-#     res = sasProject(case)
-#     allObjects = [x for x in res.get_objects()]
-#     assert allObjects == [obj for prg in expected['programs'] for obj in prg.get_objects()]
+@pytest.mark.parametrize("case,expected", testcases)
+def test_project_get_objects(case,expected):
+    res = sasProject(case)
+    allObjects = [x for x in res.get_objects()]
+    assert allObjects == [obj for prg in expected['programs'] for obj in prg.get_objects()]
