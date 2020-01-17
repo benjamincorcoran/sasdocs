@@ -26,7 +26,7 @@ testcases = [
 
 @pytest.mark.parametrize("case,expected", testcases)
 def test_project_programs(case,expected):
-    # res = sasProject(case)
+    res = sasProject(case)
     # assert list(map(lambda x: x.__dict__, res.programs)) == list(map(lambda x: x.__dict__, expected['programs']))
     assert [prg.name for prg in res.programs] == expected['names']
 
