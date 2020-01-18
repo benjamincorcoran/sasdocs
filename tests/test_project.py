@@ -17,9 +17,9 @@ def test_failed_project(case):
 
 
 res = sasProject('bad/path')
-res.add_programs_to_project(['./tests/samples/macro_1.sas','./tests/samples/macro_2.sas','./tests/samples/simple_1.sas'])
-res.path='bad/path'
-res.get_extended_info()
+# res.add_programs_to_project(['./tests/samples/macro_1.sas','./tests/samples/macro_2.sas','./tests/samples/simple_1.sas'])
+# res.path='bad/path'
+# res.get_extended_info()
 
 testcases = [
     (res,{'programs':[sasProgram('./tests/samples/macro_1.sas'), 
