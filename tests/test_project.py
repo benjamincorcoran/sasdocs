@@ -37,9 +37,8 @@ def test_project_programs_names(case,expected):
     assert set([prg.name for prg in case.programs]) == expected['names']
 
 
-# @pytest.mark.parametrize("case,expected", testcases)
-# def test_project_get_objects(case,expected):
-#     summary = Counter()
-#     for program in case.programs:
-#         summary += Counter(type(obj).__name__ for obj in program.contents) 
-#     assert case.summary == summary
+@pytest.mark.parametrize("case,expected", testcases)
+def test_project_get_objects(case,expected):
+    prjsummary = Counter(type(obj).__name__ for obj in case.get_objects()) 
+    pgssummary = Counter(type(obj).__name__ for prg in case.programs for obj in prg.get_objects())
+    assert pgssummary == prjsummary
