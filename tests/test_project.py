@@ -24,7 +24,15 @@ testcases = [
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
-def test_project_programs(case,expected):
+def test_project_programs_attrs(case,expected):
+    assert hasattr(case, 'name') is True
+    assert hasattr(case, 'nPrograms') is True
+    assert hasattr(case, 'summary') is True
+    assert hasattr(case, 'objects') is True
+
+
+@pytest.mark.parametrize("case,expected", testcases)
+def test_project_programs_names(case,expected):
     assert set([prg.name for prg in case.programs]) == expected['names']
 
 
