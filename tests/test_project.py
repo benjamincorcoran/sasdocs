@@ -19,14 +19,13 @@ testcases = [
     (sasProject('./tests/samples'),{'programs':[sasProgram('./tests/samples/macro_1.sas'), 
                       sasProgram('./tests/samples/macro_2.sas'), 
                       sasProgram('./tests/samples/simple_1.sas')],
-                        'names':['macro_1', 'macro_2', 'simple_1']}
+                        'names':set(['macro_1', 'macro_2', 'simple_1'])}
     )
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
 def test_project_programs(case,expected):
-    # assert list(map(lambda x: x.__dict__, case.programs)) == list(map(lambda x: x.__dict__, expected['programs']))
-    assert [prg.name for prg in case.programs] == expected['names']
+    assert set([prg.name for prg in case.programs]) == expected['names']
 
 
 @pytest.mark.parametrize("case,expected", testcases)
