@@ -89,11 +89,11 @@ class sasProject(object):
             if path not in [program.path for program in self.programs]:
                 self.programs.append(sasProgram(path))
         
-        # includePaths = set(include.path for include in self.get_objects(objectType='include'))
-        # while includePaths.difference(set([program.path for program in self.programs])):
-        #     for path in includePaths:
-        #         self.programs.append(sasProgram(path))
-        #     includePaths = set(include.path for include in self.get_objects(objectType='include'))
+        includePaths = set(include.path for include in self.get_objects(objectType='include'))
+        while includePaths.difference(set([program.path for program in self.programs])):
+            for path in includePaths:
+                self.programs.append(sasProgram(path))
+            includePaths = set(include.path for include in self.get_objects(objectType='include'))
         
         self.programs = [program for program in self.programs if program.failedLoad != 1]
     

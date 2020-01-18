@@ -1,6 +1,7 @@
 import pytest
 import pprint
 
+from collections import Counter
 from sasdocs.project import sasProject
 from sasdocs.program import sasProgram
 
@@ -36,7 +37,9 @@ def test_project_programs_names(case,expected):
     assert set([prg.name for prg in case.programs]) == expected['names']
 
 
-@pytest.mark.parametrize("case,expected", testcases)
-def test_project_get_objects(case,expected):
-    allObjects = [x for x in case.get_objects()]
-    assert allObjects == [obj for prg in expected['programs'] for obj in prg.get_objects()]
+# @pytest.mark.parametrize("case,expected", testcases)
+# def test_project_get_objects(case,expected):
+#     summary = Counter()
+#     for program in case.programs:
+#         summary += Counter(type(obj).__name__ for obj in program.contents) 
+#     assert case.summary == summary
