@@ -15,14 +15,8 @@ def test_failed_project(case):
     assert hasattr(res, 'summary') is False
     assert hasattr(res, 'objects') is False
 
-
-res = sasProject('bad/path')
-res.add_programs_to_project(['./tests/samples/macro_1.sas','./tests/samples/macro_2.sas','./tests/samples/simple_1.sas'])
-res.path='bad/path'
-res.get_extended_info()
-
 testcases = [
-    (res,{'programs':[sasProgram('./tests/samples/macro_1.sas'), 
+    (sasProject('./tests/samples'),{'programs':[sasProgram('./tests/samples/macro_1.sas'), 
                       sasProgram('./tests/samples/macro_2.sas'), 
                       sasProgram('./tests/samples/simple_1.sas')],
                         'names':['macro_1', 'macro_2', 'simple_1']}
