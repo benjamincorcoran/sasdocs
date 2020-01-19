@@ -69,7 +69,9 @@ def test_dataStep_parse(case, expected):
 
 
 testcases = [
-    ("proc summary data=lib2.test(where=(ax=b) rename=(a=b)); by x; output out=lib3.test2; run;", procedure(outputs=dataObject(library=['lib3'], dataset=['test2'], options=None), inputs=dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')]), type='summary'))
+    ("proc summary data=lib2.test(where=(ax=b) rename=(a=b)); by x; output out=lib3.test2; run;", procedure(outputs=dataObject(library=['lib3'], dataset=['test2'], options=None), inputs=dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')]), type='summary')),
+    ("proc summary data=lib2.test(where=(ax=b) rename=(a=b)); by x; output out=lib3.test2; out=lib4.test2; run;", procedure(outputs=[dataObject(library=['lib3'], dataset=['test2'], options=None), dataObject(library=['lib4'], dataset=['test2'], options=None)], inputs=dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')]), type='summary')),
+    ("proc summary data=lib2.test(where=(ax=b) rename=(a=b)); by x; output out=lib3.test2 sum=; out=lib4.test2 n=; run;", procedure(outputs=[dataObject(library=['lib3'], dataset=['test2'], options=None), dataObject(library=['lib4'], dataset=['test2'], options=None)], inputs=dataObject(library=['lib2'], dataset=['test'], options=[dataArg(option=['where'], setting='(ax=b)'), dataArg(option=['rename'], setting='(a=b)')]), type='summary'))
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
