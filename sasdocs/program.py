@@ -3,15 +3,14 @@ import datetime
 import logging
 import pathlib
 import jinja2
-
-from collections import Counter
 import importlib.resources as pkg_resources
 
-from . import templates
+from collections import Counter
+
+from . import templates, format_logger
 from .objects import fullprogram, force_partial_parse
 
 
-log = logging.getLogger(__name__) 
 
 class sasProgram(object):
     """
@@ -38,6 +37,13 @@ class sasProgram(object):
     """
 
     def __init__(self, path):
+
+        self.path = path
+        self.logger = logging.getLogger(__name__)
+        try: 
+            self.logger = format_logger(self.logger,{'path':self.path})
+        except Exception as e:
+            self.logger.error("Unable to format log. {}".format(e))
         
         if self.load_file(path) is False:
             self.contents = []
@@ -65,20 +71,20 @@ class sasProgram(object):
             self.path = pathlib.Path(path).resolve(strict=True)
         except Exception as e:
             self.path = pathlib.Path(path)
-            log.error("Unable to resolve path: {}".format(e))
+            self.logger.error("Unable to resolve path: {}".format(e))
             return False
             
         try:
             with open(self.path,'r') as f :
                 self.raw = f.read()
         except Exception as e:
-            log.error("Unable to read file: {}".format(e))
+            self.logger.error("Unable to read file: {}".format(e))
             return False
 
         try:
             self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True, mark=True)
         except Exception as e:
-            log.error("Unable to parse file: {}".format(e))
+            self.logger.error("Unable to parse file: {}".format(e))
             return False
 
     def get_objects(self, object=None, objectType=None):
@@ -158,6 +164,7 @@ class sasProgram(object):
         """
         
         self.name = self.path.stem
+        self.nameURL = self.name.replace(' ','%20')
         self.lines = self.raw.count('\n')
         self.lastEdit = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.fromtimestamp(os.stat(self.path).st_mtime))
         self.summary = dict(self.summarise_objects())
