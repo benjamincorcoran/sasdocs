@@ -812,7 +812,7 @@ proc = ps.seq(
     _h1 = ps.regex(r'.*?(?=data)', flags=reFlags),
     inputs = (ps.regex(r'data', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataObj,
     _h2 = ps.regex(r'.*?(?=out\s*=)', flags=reFlags).optional(),
-    outputs = ((ps.regex(r'out', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataObj).optional(),
+    outputs = ((ps.regex(r'out', flags=re.IGNORECASE) + opspc + eq + opspc) >> dataObj).sep_by(ps.regex(r'(?:(?!run|quit).)*?(?=out\s*=)', flags=reFlags)).optional(),
     _h3 = ps.regex(r'.*?(?=run|quit)', flags=reFlags),
     _run = (run|qt) + opspc + col
 ).combine_dict(procedure)
