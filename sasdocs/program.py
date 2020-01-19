@@ -62,8 +62,9 @@ class sasProgram(object):
             Filepath to the SAS file to be parsed.
         """
         try:
-            self.path = pathlib.Path(path).resolve()
+            self.path = pathlib.Path(path).resolve(strict=True)
         except Exception as e:
+            self.path = pathlib.Path(path)
             log.error("Unable to resolve path: {}".format(e))
             return False
             

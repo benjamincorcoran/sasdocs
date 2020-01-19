@@ -256,7 +256,6 @@ class include(baseSASObject):
 
     """
     path = attr.ib()
-    uri = ''
     @path.validator
     def check_path_is_valid(self, attribute, value):
         """
