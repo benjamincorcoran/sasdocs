@@ -45,7 +45,7 @@ def rebuild_macros(objs, i=0):
     Returns
     -------
     list
-        parsed objects from string
+        A list of parsed objects with macros rebuilt into single macro objects.
     '''
     output = []
     while i < len(objs):
@@ -73,6 +73,9 @@ def force_partial_parse(parser, string, stats=False, mark=False):
         String to be parsed
     stats : bool
         Return percentage parsed if true
+    mark : bool
+        Turn on line:col marking on the parser to identify what point in 
+        string the object was parsed at. 
 
     Returns
     -------
@@ -399,6 +402,8 @@ class dataStep(baseSASObject):
         Any code between the end of the 'data ;' statement and the begining of the 'set/merge ;' statement
     body : str
         Any code between the end of the 'set/merge ;' statement and the 'run;' statement
+    options : list
+        Any options set after the '/' on the datastep. i.e. 'data test / view=test'. 
     """
     outputs = attr.ib()
     inputs = attr.ib()
@@ -482,7 +487,12 @@ class libname(baseSASObject):
         Hardcoded path pointing to library on disk
     pointer : str, optional
         Libname reference if current libname is pointing to an already established library
-
+    is_path : bool
+        Indicate whether the libname points to a specific path 
+    is_pointer : bool 
+        Indicate whether the libname points to another library
+    uri : string
+        URL safe version of the path variable
     """
     library = attr.ib()
     path = attr.ib()
@@ -542,6 +552,8 @@ class macroStart(baseSASObject):
         Name of the %macro being defined
     arguments : list, optional
         List of macroargument objects as defined
+    options : list, optional 
+        List of options set on the macro in the '%macro' line. 
     """
     name = attr.ib()
     arguments = attr.ib()
@@ -621,6 +633,18 @@ class macro(baseSASObject):
         List of macroarguments parsed from the macro defintion
     contents : list
         List of sasdocs objects parsed within the macro
+    options : list
+        List of options set on the '%macro' line
+    rawAbout : string
+        The comments directly after the '%macro' line, analogous to a 
+        docstring. 
+    documented : bool
+        Indicates whether a docstring has been found 
+    about : string
+        Cleaned up version of rawAbout, removing SAS comment characters and 
+        excessive spacing 
+    shortDesc : string
+        The first 200 characters of about with tabs and new lines removed.
     """
     name = attr.ib()
     arguments = attr.ib()
