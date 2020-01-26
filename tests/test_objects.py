@@ -1,5 +1,6 @@
 import pytest
-from sasdocs.objects import *
+from sasdocs.parsers import *
+from sasdocs.objects import * 
 
 testcases = [
     ("test", ["test"]),

@@ -4,7 +4,8 @@ import logging
 import pathlib
 
 from collections import Counter
-from .objects import fullprogram, force_partial_parse
+from .objects import force_partial_parse
+from .parsers import fullprogram
 
 log = logging.getLogger(__name__) 
 
