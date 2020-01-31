@@ -4,4 +4,4 @@
 .pytest_cache
 __pycache__
 docs/build
-docs/source/_build
+sasdocs.log
