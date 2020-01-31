@@ -1,12 +1,18 @@
-import os
+import re
 import datetime 
 import logging
 import pathlib
+import datetime
+import jinja2
+
+import importlib.resources as pkg_resources
 
 from collections import Counter
+
+from . import templates, format_logger
 from .program import sasProgram
 
-log = logging.getLogger(__name__) 
+
 
 class sasProject(object):
     """
@@ -29,7 +35,17 @@ class sasProject(object):
     """
 
     def __init__(self, path):
+
+        self.path = path
+        self.logger = logging.getLogger(__name__)
+        try: 
+            self.logger = format_logger(self.logger,{'path':self.path})
+        except Exception as e:
+            self.logger.error("Unable to format log. {}".format(e))
+        
         self.programs = []
+        self.documentation = {}
+
         if self.load_project(path) is False:
             return None
         
@@ -52,19 +68,19 @@ class sasProject(object):
         try:
             self.path = pathlib.Path(path).resolve(strict=True)
         except Exception as e:
-            log.error("Unable to resolve path: {}".format(e))
+            self.logger.error("Unable to resolve path: {}".format(e))
             return False
 
         try: 
             programPaths = self.path.rglob('*.sas')
         except Exception as e:
-            log.error("Unable to search folder: {}".format(e))
+            self.logger.error("Unable to search folder: {}".format(e))
             return False
         
         try: 
             self.add_programs_to_project(programPaths)
         except Exception as e:
-            log.error("Unable to add programs to project: {}".format(e))
+            self.logger.error("Unable to add programs to project: {}".format(e))
             return False
         
         # self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
@@ -96,6 +112,31 @@ class sasProject(object):
             includePaths = set(include.path for include in self.get_objects(objectType='include'))
         
         self.programs = [program for program in self.programs if program.failedLoad != 1]
+    
+    def add_addtional_documentation_to_project(self):
+        """
+        Add any documenation found in the project as an attribute.
+
+        Creates readme and documentation attributes.
+        """
+        mdPaths = self.path.glob('*.md')
+
+        # Test for README in root directory
+        readMe = self.path.joinpath('readme.md')
+        if readMe.is_file():
+            with self.path.joinpath('readme.md').open() as f:
+                self.readme = f.read()
+                
+                self.readme = re.sub(r'(^#+\s)',r'#\1',self.readme,flags=re.M)
+        else:
+            self.readme = ''
+        
+        docs = {}
+        for path in mdPaths:
+            with path.open() as f:
+                docs[path.relative_to(self.path)] = f.read()
+        self.documentation['additional'] = docs
+        
     
     def summarise_project(self):
         """
@@ -159,7 +200,41 @@ class sasProject(object):
         """
         objSum, prgSum = self.summarise_project()
         
-        self.name = os.path.basename(self.path)
-        self.nPrograms = len(self.programs)
+        self.name = self.path.name
         self.summary = dict(objSum)
         self.objects = dict(prgSum)
+        self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
+        
+    def generate_documentation(self, outputDirectory=None):
+        """
+        generate_documentation(outputDirectory=None)
+
+        Generate documentation for the project using the jinja2 templates
+
+        """
+        self.add_addtional_documentation_to_project()
+
+        mdFiles = dict(
+            index = pkg_resources.read_text(templates, 'index.md'),
+            macroIndex = pkg_resources.read_text(templates, 'macroIndex.md'),
+        )
+
+        mdFiles = {k:jinja2.Template(t) for k,t in mdFiles.items()}
+
+        self.documentation['project']  = {
+            'index': mdFiles['index'].render(project=self),
+            'macroIndex' : mdFiles['macroIndex'].render(project=self)
+        }
+
+        self.documentation['programs']  = {program.path: program.generate_documentation() for program in self.programs}
+
+        if outputDirectory is not None:
+            out = pathlib.Path(outputDirectory)
+            if not out.is_dir():
+                out.mkdir()
+            
+            for page, render in self.documentation['project'].items():
+                out.joinpath(page+'.md').write_text(render)
+            
+            for page, render in self.documentation['programs'].items():
+                out.joinpath(page.stem+'.md').write_text(render)

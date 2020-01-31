@@ -1,4 +1,5 @@
 %include "a/bad/path";
+libname output "path/to/output";
 
 data test1;
     set test;
