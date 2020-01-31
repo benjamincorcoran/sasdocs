@@ -1,2 +1,5 @@
 attrs
 parsy
+m2r
+jinja2
+sphinx
