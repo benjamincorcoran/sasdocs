@@ -12,8 +12,6 @@ from .objects import force_partial_parse
 from .parsers import fullprogram
 
 
-
-
 class sasProgram(object):
     """
     Abstracted SAS program class.

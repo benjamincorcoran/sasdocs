@@ -201,6 +201,7 @@ class sasProject(object):
         objSum, prgSum = self.summarise_project()
         
         self.name = self.path.name
+        self.nPrograms = len(self.programs)
         self.summary = dict(objSum)
         self.objects = dict(prgSum)
         self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
