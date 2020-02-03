@@ -7,6 +7,7 @@ sasdocs
 
    installation
    usage
+   sphinx
    objects
 
 
