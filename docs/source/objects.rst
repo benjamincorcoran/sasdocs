@@ -1,5 +1,5 @@
-Index
-=====
+API reference
+=============
 
 Objects
 -------
