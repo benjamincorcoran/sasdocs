@@ -12,46 +12,64 @@ The library also allows for these objects to be converted into readable document
 
 ## Installation
 
-
-### Clone
-
-- Clone this repo to your local machine using `https://github.com/benjamincorcoran/sasdocs`
-
-### Setup
-
-
-* Move into the cloned directory and pip install the package
-
+```shell 
+$ pip install git+https://github.com/benjamincorcoran/sasdocs
+``` 
+or clone this repository and pip install locally.
 ```shell
-$ cd cloned-directory
-$ pip install ./
+$ git clone https://github.com/benjamincorcoran/sasdocs
+$ pip install ./sasdocs
 ```
+
+## Documentation 
+Complete documentation available at [ReadTheDocs.io](https://sasdocs.readthedocs.io/en/latest/index.html) 
 
 ## Usage
 
-## Features
+This module can be used as part of a python project to explore static SAS code, or in tandem with sphinx to autogenerate documentation from SAS code. 
 
-TBW
+### Simple Example 
 
-## Documentation 
+In the tests/samples folder in this repository there are three .sas files.
+```
+├───samples
+│       macro_1.sas
+│       macro_2.sas
+│       simple_1.sas
+```
+Using the below code, we can generate a SASProject object that will collect all of these files and parse them.
+```python
+from sasdocs.project import sasProject
 
-View complete documentation on [ReadTheDocs.io](https://sasdocs.readthedocs.io/en/latest/index.html) 
+prj = sasProject("./tests/samples")
+```
+This `prj` instance now contains several attributes that can be used to describe the project and in the individual programs contained within.
+```python
+print(prj.name)
+>> "samples"
 
+print(prj.programs)
+>> [macro_1.sas, macro_2.sas, simple_1.sas]
 
+print(prj.summary)
+>> {'dataStep': 7, 'macro': 4, 'include': 2, 'procedure': 3}
+```
 
-## Contributing
+### Sphinx directives
 
-1. Clone this repo to your local machine using `https://github.com/benjamincorcoran/sasdocs.git`
+Any .rst file in your source directory can call the sasinclude directive which will parse the passed SAS file or all SAS files found in the folder and return the result at the point that the directive is called.
 
-2. Create a new pull request using `https://github.com/benjamincorcoran/sasdocs/compare/`.
+```rst
+.. This will parse sasprogram1.sas and return the result.
+.. sasinclude:: ..\sasprograms\sasprogram1.sas
 
+.. This will parse all programs in the ..\sasprograms directory and return the results here.
+.. sasinclude:: ..\sasprograms\
+```
 
 ## Contributors
 
-**Ben Corcoran** - 2019
-
-[![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/benjamincorcoran/ama)
-[![Follow](https://img.shields.io/github/followers/benjamincorcoran.svg?label=Follow&style=plastic)](https://GitHub.com/benjamincorcoran/)
+**Ben Corcoran** - 2019 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/benjamincorcoran/ama) [![Follow](https://img.shields.io/github/followers/benjamincorcoran.svg?label=Follow)](https://GitHub.com/benjamincorcoran/)
 
 
 ## License
