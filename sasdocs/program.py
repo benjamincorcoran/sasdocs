@@ -52,6 +52,7 @@ class sasProgram(object):
             self.failedLoad = 0
             self.get_extended_info()
             self.get_documentation()
+            self.get_data_objects()
 
     def load_file(self, path):
         """
@@ -121,6 +122,24 @@ class sasProgram(object):
                     yield obj
             else:
                 yield obj
+    
+    def get_data_objects(self):
+        """
+        get_data_objects
+
+        Loop through all datasteps and procedures and add any valid dataobjects
+        to a list self.dataObjects
+        """
+        self.dataObjects = {}
+
+        for validObject in ('dataStep', 'procedure'):
+            for proc in self.get_objects(objectType=validObject):
+                for dataset in proc.inputs + proc.outputs:
+                    if dataset.UID not in self.dataObjects.keys():
+                        self.dataObjects[dataset.UID] = [{'obj':dataset, 'start':proc.start, 'end':proc.end}]
+                    else:
+                        self.dataObjects[dataset.UID].append({'obj':dataset, 'start':proc.start, 'end':proc.end})    
+
 
     def summarise_objects(self, object=None):
         """

@@ -32,6 +32,14 @@
 {% endfor %}
 {% endif %}
 
+{% if program.dataObjects | length > 0 %}
+## Datasets
+| Library | Dataset | Line | 
+| --- | --- | --- |
+{% for UID, lst in program.dataObjects.items() %} | {{''.join(lst[0]['obj'].library)}} | {{''.join(lst[0]['obj'].dataset)}} | {% for ref in lst %} {{ref['start'][0]}}:{{ref['end'][0]}}, {% endfor %} |
+{% endfor %}
+{% endif %}
+
 ## Raw code 
 
 ```sas
