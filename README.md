@@ -69,7 +69,8 @@ Any .rst file in your source directory can call the sasinclude directive which w
 
 ## Contributors
 
-**Ben Corcoran** - 2019 [![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/benjamincorcoran/ama) [![Follow](https://img.shields.io/github/followers/benjamincorcoran.svg?label=Follow)](https://GitHub.com/benjamincorcoran/)
+**Ben Corcoran** - 2019 
+[![Ask Me Anything !](https://img.shields.io/badge/Ask%20me-anything-1abc9c.svg)](https://GitHub.com/benjamincorcoran/ama) [![Follow](https://img.shields.io/github/followers/benjamincorcoran.svg?label=Follow)](https://GitHub.com/benjamincorcoran/)
 
 
 ## License
