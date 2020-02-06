@@ -1,2 +1,3 @@
 include README.md
 graft sasdocs/templates/
+graft sasdocs/sphinxstatic/

@@ -40,6 +40,19 @@
 {% endfor %}
 {% endif %}
 
+## Network 
+
+
+<script>
+
+$(document).ready(function(){
+    createNetworkGraph({{program.networkJSON}},'{{program.name}}Network');
+});
+
+</script>
+
+<div><svg id="{{program.name}}Network"></svg></div>
+
 ## Raw code 
 
 ```sas

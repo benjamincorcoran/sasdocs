@@ -1,8 +1,10 @@
 import os
+import json
 import datetime 
 import logging
 import pathlib
 import jinja2
+import networkx
 import importlib.resources as pkg_resources
 
 from collections import Counter
@@ -53,6 +55,7 @@ class sasProgram(object):
             self.get_extended_info()
             self.get_documentation()
             self.get_data_objects()
+            self.build_network()
 
     def load_file(self, path):
         """
@@ -139,6 +142,38 @@ class sasProgram(object):
                         self.dataObjects[dataset.UID] = [{'obj':dataset, 'start':proc.start, 'end':proc.end}]
                     else:
                         self.dataObjects[dataset.UID].append({'obj':dataset, 'start':proc.start, 'end':proc.end})    
+
+    def build_network(self):
+        """
+        build_network
+
+        Generate a JSON containing the network diagram for the SAS code.
+        """
+
+        self.networkGraph = networkx.DiGraph()
+
+        for validObject in ('dataStep','procedure'):
+            for obj in self.get_objects(objectType=validObject):
+
+                for input in obj.inputs:
+                    if self.networkGraph.has_node(input.UID) is False:
+                        self.networkGraph.add_node(input.UID, library=input.library, dataset=input.dataset, line=obj.start[0])
+                    
+                    for output in obj.outputs:
+                        if self.networkGraph.has_node(output.UID) is False:
+                            self.networkGraph.add_node(output.UID, library=output.library, dataset=output.dataset, line=obj.start[0])
+                        
+                        if input.UID != output.UID:
+                            if hasattr(obj,'type'):
+                                self.networkGraph.add_edge(input.UID, output.UID, label=f'proc {obj.type}')
+                            else:
+                                self.networkGraph.add_edge(input.UID, output.UID)
+        
+        self.networkJSON = json.dumps(networkx.readwrite.json_graph.node_link_data(self.networkGraph))
+
+
+
+
 
 
     def summarise_objects(self, object=None):
