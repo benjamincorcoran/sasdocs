@@ -195,11 +195,11 @@ function createNetworkGraph(json, output){
 	function focus(d) {
 		var index = d3.select(d3.event.target).datum().index;
 
-		div.transition().duration(200).style("opacity", .9);		
+		div.transition().duration(200).style("opacity", .7);		
 
-		div.html("<b>"+d.library+"."+d.dataset+"</b>\nLine: "+d.line)	
+		div.html("<b>"+d.library+"."+d.dataset+"</b><br>Line: "+d.line)	
                 .style("left", (d3.event.pageX) + "px")		
-				.style("top", (d3.event.pageY - 28) + "px");
+				.style("top", (d3.event.pageY - 40) + "px");
 		
 		node.style("opacity", function(o) {
 			return neigh(index, o.index) ? 1 : 0.1;

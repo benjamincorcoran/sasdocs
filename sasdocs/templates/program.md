@@ -46,12 +46,12 @@
 <script>
 
 $(document).ready(function(){
-    createNetworkGraph({{program.networkJSON}},'{{program.name}}Network');
+    createNetworkGraph({{program.networkJSON}},'{{program.name.replace(" ","")}}Network');
 });
 
 </script>
 
-<div><svg id="{{program.name}}Network"></svg></div>
+<div><svg id='{{program.name.replace(" ","")}}Network'></svg></div>
 
 ## Raw code 
 
