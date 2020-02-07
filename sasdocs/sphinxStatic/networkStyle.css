@@ -1,0 +1,28 @@
+
+.links {
+	stroke:"#aaa";
+	stroke-width:1px;
+}
+
+.nodes{
+}
+
+.labelNodes text{
+	fill: rgb(85, 85, 85); 
+	font-family: Arial; 
+	font-weight: bold;
+	font-size: 12px; 
+}
+
+.labelLinks text{
+	fill: rgb(85, 85, 85); 
+	opacity: 0.5;
+	font-family: Arial; 
+	font-size: 10px; 
+}
+
+.legend {
+	fill: rgb(85, 85, 85); 
+	font-family: Arial; 
+	font-size: 12px; 
+}

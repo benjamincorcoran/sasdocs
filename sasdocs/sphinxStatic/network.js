@@ -60,7 +60,7 @@ function createNetworkGraph(json, output){
 		.enter()
 		.append("circle")
 		.attr("r", 5)
-		.attr("fill", function(d) { return color(d.lib); })
+		.attr("fill", function(d) { return color(d.library); })
 	
 	node.on("mouseover", focus).on("mouseout", unfocus);
 
@@ -107,7 +107,7 @@ function createNetworkGraph(json, output){
 		.data(color.domain())
 		.enter().append("g")
 		.attr("class", "legend")
-		.attr("lib", function(d) {return d;})
+		.attr("library", function(d) {return d;})
 		.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
 		legend.append("rect")
@@ -202,18 +202,18 @@ function createNetworkGraph(json, output){
 	}
 	
 	function legfocus(d) {
-		var lib = d3.select(d3.event.target).datum();
+		var library = d3.select(d3.event.target).datum();
 		node.style("opacity", function(o) {
-			return lib==o.lib ? 1 : 0.1;
+			return library==o.library ? 1 : 0.1;
 		});
 		labelLink.attr("display", function(o) {
-		  return lib==o.lib ? "block": "none";
+		  return library==o.library ? "block": "none";
 		});
 		labelNode.attr("display", function(o) {
-		  return lib==o.lib ? "block": "none";
+		  return library==o.library ? "block": "none";
 		});
 		link.style("opacity", function(o) {
-			return lib==o.source.lib && lib==o.target.lib ? 1 : 0.1;
+			return library==o.source.library && library==o.target.library ? 1 : 0.1;
 		});
 	}
 	

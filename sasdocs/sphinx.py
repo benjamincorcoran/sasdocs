@@ -61,6 +61,9 @@ def setup(app):
     with pkg_resources.path(sphinxStatic, 'network.js') as p:
         copyfile(str(p), os.path.join(app.srcdir,'_static','network.js'))
         app.add_js_file('network.js')
+    with pkg_resources.path(sphinxStatic, 'networkStyle.css') as p:
+        copyfile(str(p), os.path.join(app.srcdir,'_static','networkStyle.css'))
+        app.add_css_file('networkStyle.css')
 
     
 
