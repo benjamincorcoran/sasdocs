@@ -6,6 +6,10 @@ function createNetworkGraph(json, output){
 	var width = 700;
 	var height = 500;
 	var color = d3.scaleOrdinal(d3.schemePastel2);
+
+	var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+	.style("opacity", 0);
 	
 	var labelLayout = d3.forceSimulation(nodes)
 		.force("charge", d3.forceManyBody().strength(-50));
@@ -63,6 +67,9 @@ function createNetworkGraph(json, output){
 		.attr("fill", function(d) { return color(d.library); })
 	
 	node.on("mouseover", focus).on("mouseout", unfocus);
+
+
+	
 
 	node.call(
 		d3.drag()
@@ -187,6 +194,13 @@ function createNetworkGraph(json, output){
 
 	function focus(d) {
 		var index = d3.select(d3.event.target).datum().index;
+
+		div.transition().duration(200).style("opacity", .9);		
+
+		div.html("<b>"+d.library+"."+d.dataset+"</b>\nLine: "+d.line)	
+                .style("left", (d3.event.pageX) + "px")		
+				.style("top", (d3.event.pageY - 28) + "px");
+		
 		node.style("opacity", function(o) {
 			return neigh(index, o.index) ? 1 : 0.1;
 		});
@@ -224,6 +238,7 @@ function createNetworkGraph(json, output){
 	   labelLink.attr("display", "block");
 	   node.style("opacity", 1);
 	   link.style("opacity", 1);
+	   div.transition().duration(500).style("opacity", 0);	
 	}
 
 	function updateLink(link) {
