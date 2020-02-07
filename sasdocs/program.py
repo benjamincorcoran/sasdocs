@@ -45,7 +45,7 @@ class sasProgram(object):
         try: 
             self.logger = format_logger(self.logger,{'path':self.path})
         except Exception as e:
-            self.logger.error("Unable to format log. {}".format(e))
+            self.logger.exception("Unable to format log. {}".format(e))
         
         if self.load_file(path) is False:
             self.contents = []
@@ -82,13 +82,13 @@ class sasProgram(object):
             with open(self.path,'r') as f :
                 self.raw = f.read()
         except Exception as e:
-            self.logger.error("Unable to read file: {}".format(e))
+            self.logger.exception("Unable to read file: {}".format(e))
             return False
 
         try:
             self.contents, self.parsedRate = force_partial_parse(fullprogram, self.raw, stats=True, mark=True)
         except Exception as e:
-            self.logger.error("Unable to parse file: {}".format(e))
+            self.logger.exception("Unable to parse file: {}".format(e))
             return False
 
     def get_objects(self, object=None, objectType=None):
@@ -168,8 +168,12 @@ class sasProgram(object):
                                 self.networkGraph.add_edge(input.UID, output.UID, label=f'proc {obj.type}')
                             else:
                                 self.networkGraph.add_edge(input.UID, output.UID)
-        
-        self.networkJSON = json.dumps(networkx.readwrite.json_graph.node_link_data(self.networkGraph))
+
+
+        network = networkx.readwrite.json_graph.node_link_data(self.networkGraph)
+        self.hasNodes = len(network['nodes']) > 0    
+        self.networkJSON = json.dumps(network)
+
 
 
 

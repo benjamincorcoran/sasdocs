@@ -40,8 +40,8 @@
 {% endfor %}
 {% endif %}
 
+{%if program.hasNodes %}
 ## Network 
-
 
 <script>
 
@@ -52,6 +52,7 @@ $(document).ready(function(){
 </script>
 
 <div><svg id='{{program.name.replace(" ","")}}Network'></svg></div>
+{% endif %}
 
 ## Raw code 
 
