@@ -1,0 +1,41 @@
+
+.links {
+	stroke:"#aaa";
+	stroke-width:1px;
+}
+
+.nodes{
+}
+
+.labelNodes text{
+	fill: rgb(85, 85, 85); 
+	font-family: Arial; 
+	font-weight: bold;
+	font-size: 12px; 
+}
+
+.labelLinks text{
+	fill: rgb(85, 85, 85); 
+	opacity: 0.5;
+	font-family: Arial; 
+	font-size: 10px; 
+}
+
+.legend {
+	fill: rgb(85, 85, 85); 
+	font-family: Arial; 
+	font-size: 12px; 
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: left;			
+    width: auto;					
+    height: 28px;					
+    padding: 2px;				
+    font: 12px sans-serif;		
+    background: rgb(199, 199, 199);	
+    border: 0px;		
+    border-radius: 8px;			
+    pointer-events: none;			
+}

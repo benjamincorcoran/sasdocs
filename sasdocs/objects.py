@@ -412,6 +412,12 @@ class dataStep(baseSASObject):
     body = attr.ib(repr=False, default=None)
     options = attr.ib(default=None)
 
+    def __attrs_post_init__(self):
+        if self.outputs is None:
+            self.outputs = []
+        if self.inputs is None:
+            self.inputs = []
+
 @attr.s
 class procedure(baseSASObject):
     """
@@ -444,6 +450,13 @@ class procedure(baseSASObject):
     def __attrs_post_init__(self):
         self.outputs=flatten_list([self.outputs])
         self.inputs=flatten_list([self.inputs])
+        
+        if self.outputs is None:
+            self.outputs = []
+        if self.inputs is None:
+            self.inputs = []
+        
+        self.type=self.type.lower()
 
 @attr.s
 class unparsedSQLStatement(baseSASObject):

@@ -32,8 +32,38 @@
 {% endfor %}
 {% endif %}
 
+{% if program.dataObjects | length > 0 %}
+## Datasets
+| Library | Dataset | Line | 
+| --- | --- | --- |
+{% for UID, lst in program.dataObjects.items() %} | {{''.join(lst[0]['obj'].library)}} | {{''.join(lst[0]['obj'].dataset)}} | {% for ref in lst %} {{ref['start'][0]}}:{{ref['end'][0]}}, {% endfor %} |
+{% endfor %}
+{% endif %}
+
+{%if program.hasNodes %}
+## Network 
+
+<script>
+
+$(document).ready(function(){
+    createNetworkGraph({{program.networkJSON}},'{{program.name.replace(" ","")}}Network');
+});
+
+</script>
+
+<div><svg id='{{program.name.replace(" ","")}}Network'></svg></div>
+{% endif %}
+
 ## Raw code 
 
-```sas
-{{program.raw}}
-```
+<script>
+$(document).ready(function(){
+    var textArea = $("#cma{{program.name.replace(' ','')}}");
+    textArea.val(`{{program.raw}}`);	
+	var cmConfig = {mode:"sas",lineNumbers:true,readOnly:true,gutter:true,lineWrapping:true,autoRefresh: true};
+    var codeMirror = CodeMirror.fromTextArea(document.getElementById("cma{{program.name.replace(' ','')}}"), cmConfig);
+});
+</script>
+
+<textarea id="cma{{program.name.replace(' ','')}}"></textarea>
+

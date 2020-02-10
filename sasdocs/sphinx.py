@@ -8,9 +8,12 @@ from sphinx.util.docutils import SphinxDirective
 
 from shutil import copyfile
 
+import importlib.resources as pkg_resources
 
 from .program import sasProgram
 from .project import sasProject
+
+from . import sphinxStatic
 
 __version__ = 0.01
 
@@ -50,8 +53,22 @@ class SASParser(rst.Parser):
 def setup(app):
     app.add_source_suffix('.sas','sas_program')
     app.add_source_parser(SASParser)
-
     app.add_directive('sasinclude', SASDirective)
+
+
+    jsfiles = ['d3.v5.js', 'network.js', 'codemirror.js', 'codemirrorSAS.js']
+    cssfiles = ['networkStyle.css', 'codemirrorStyle.css']
+
+    for js in jsfiles:
+        with pkg_resources.path(sphinxStatic, js) as p:
+            copyfile(str(p), os.path.join(app.srcdir, '_static', js))
+            app.add_js_file(js)
+
+    for css in cssfiles:
+        with pkg_resources.path(sphinxStatic, css) as p:
+            copyfile(str(p), os.path.join(app.srcdir, '_static', css))
+            app.add_css_file(css)
+
 
     return {
         'version': __version__,

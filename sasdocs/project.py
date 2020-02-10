@@ -41,7 +41,7 @@ class sasProject(object):
         try: 
             self.logger = format_logger(self.logger,{'path':self.path})
         except Exception as e:
-            self.logger.error("Unable to format log. {}".format(e))
+            self.logger.exception("Unable to format log. {}".format(e))
         
         self.programs = []
         self.documentation = {}
@@ -68,19 +68,19 @@ class sasProject(object):
         try:
             self.path = pathlib.Path(path).resolve(strict=True)
         except Exception as e:
-            self.logger.error("Unable to resolve path: {}".format(e))
+            self.logger.exception("Unable to resolve path: {}".format(e))
             return False
 
         try: 
             programPaths = self.path.rglob('*.sas')
         except Exception as e:
-            self.logger.error("Unable to search folder: {}".format(e))
+            self.logger.exception("Unable to search folder: {}".format(e))
             return False
         
         try: 
             self.add_programs_to_project(programPaths)
         except Exception as e:
-            self.logger.error("Unable to add programs to project: {}".format(e))
+            self.logger.exception("Unable to add programs to project: {}".format(e))
             return False
         
         # self.macroVariables = {d.variable:d.value for d in self.get_objects(objectType='macroVariableDefinition')}
