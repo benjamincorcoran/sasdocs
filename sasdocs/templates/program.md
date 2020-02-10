@@ -56,6 +56,19 @@ $(document).ready(function(){
 
 ## Raw code 
 
-```sas
-{{program.raw}}
-```
+<script>
+
+$(document).ready(function(){
+    var textArea = $("#cma{{program.name.replace(' ','')}}");
+    textArea.val(`{{program.raw}}`);
+
+	
+	var cmConfig = {mode:"sas",lineNumbers:true,readOnly:true,gutter:true,lineWrapping:true,autoRefresh: true};
+    var codeMirror = CodeMirror.fromTextArea(document.getElementById("cma{{program.name.replace(' ','')}}"), cmConfig);
+    codeMirror.setSize(null,500);	
+});
+	
+</script>
+
+<textarea id="cma{{program.name.replace(' ','')}}"></textarea>
+

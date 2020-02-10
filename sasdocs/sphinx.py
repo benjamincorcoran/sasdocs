@@ -61,9 +61,18 @@ def setup(app):
     with pkg_resources.path(sphinxStatic, 'network.js') as p:
         copyfile(str(p), os.path.join(app.srcdir,'_static','network.js'))
         app.add_js_file('network.js')
+    with pkg_resources.path(sphinxStatic, 'codemirror.js') as p:
+        copyfile(str(p), os.path.join(app.srcdir,'_static','codemirror.js'))
+        app.add_js_file('codemirror.js')
+    with pkg_resources.path(sphinxStatic, 'codemirrorSAS.js') as p:
+        copyfile(str(p), os.path.join(app.srcdir,'_static','codemirrorSAS.js'))
+        app.add_js_file('codemirrorSAS.js')
     with pkg_resources.path(sphinxStatic, 'networkStyle.css') as p:
         copyfile(str(p), os.path.join(app.srcdir,'_static','networkStyle.css'))
         app.add_css_file('networkStyle.css')
+    with pkg_resources.path(sphinxStatic, 'codemirrorStyle.css') as p:
+        copyfile(str(p), os.path.join(app.srcdir,'_static','codemirrorStyle.css'))
+        app.add_css_file('codemirrorStyle.css')
 
     
 
