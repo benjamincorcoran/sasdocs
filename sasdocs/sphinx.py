@@ -55,26 +55,20 @@ def setup(app):
     app.add_source_parser(SASParser)
     app.add_directive('sasinclude', SASDirective)
 
-    with pkg_resources.path(sphinxStatic, 'd3.v5.js') as p:
-        copyfile(str(p), os.path.join(app.srcdir,'_static','d3.v5.js'))
-        app.add_js_file('d3.v5.js')
-    with pkg_resources.path(sphinxStatic, 'network.js') as p:
-        copyfile(str(p), os.path.join(app.srcdir,'_static','network.js'))
-        app.add_js_file('network.js')
-    with pkg_resources.path(sphinxStatic, 'codemirror.js') as p:
-        copyfile(str(p), os.path.join(app.srcdir,'_static','codemirror.js'))
-        app.add_js_file('codemirror.js')
-    with pkg_resources.path(sphinxStatic, 'codemirrorSAS.js') as p:
-        copyfile(str(p), os.path.join(app.srcdir,'_static','codemirrorSAS.js'))
-        app.add_js_file('codemirrorSAS.js')
-    with pkg_resources.path(sphinxStatic, 'networkStyle.css') as p:
-        copyfile(str(p), os.path.join(app.srcdir,'_static','networkStyle.css'))
-        app.add_css_file('networkStyle.css')
-    with pkg_resources.path(sphinxStatic, 'codemirrorStyle.css') as p:
-        copyfile(str(p), os.path.join(app.srcdir,'_static','codemirrorStyle.css'))
-        app.add_css_file('codemirrorStyle.css')
 
-    
+    jsfiles = ['d3.v5.js', 'network.js', 'codemirror.js', 'codemirrorSAS.js']
+    cssfiles = ['networkStyle.css', 'codemirrorStyle.css']
+
+    for js in jsfiles:
+        with pkg_resources.path(sphinxStatic, js) as p:
+            copyfile(str(p), os.path.join(app.srcdir, '_static', js))
+            app.add_js_file(js)
+
+    for css in cssfiles:
+        with pkg_resources.path(sphinxStatic, css) as p:
+            copyfile(str(p), os.path.join(app.srcdir, '_static', css))
+            app.add_css_file(css)
+
 
     return {
         'version': __version__,

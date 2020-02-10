@@ -455,6 +455,8 @@ class procedure(baseSASObject):
             self.outputs = []
         if self.inputs is None:
             self.inputs = []
+        
+        self.type=self.type.lower()
 
 @attr.s
 class unparsedSQLStatement(baseSASObject):

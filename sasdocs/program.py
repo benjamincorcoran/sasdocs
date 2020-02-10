@@ -53,7 +53,7 @@ class sasProgram(object):
         else:
             self.failedLoad = 0
             self.get_extended_info()
-            self.get_documentation()
+            self.parse_code_documentation()
             self.get_data_objects()
             self.build_network()
 
@@ -147,7 +147,8 @@ class sasProgram(object):
         """
         build_network
 
-        Generate a JSON containing the network diagram for the SAS code.
+        Generate a JSON containing the network diagram for the SAS code and add to class variable self.networkJSON
+        Add class varaible self.hasNodes containing a bool as to whether this code contains any valid data objects.
         """
 
         self.networkGraph = networkx.DiGraph()
@@ -173,10 +174,6 @@ class sasProgram(object):
         network = networkx.readwrite.json_graph.node_link_data(self.networkGraph)
         self.hasNodes = len(network['nodes']) > 0    
         self.networkJSON = json.dumps(network)
-
-
-
-
 
 
 
@@ -229,7 +226,20 @@ class sasProgram(object):
         self.parsed = "{:.2%}".format(self.parsedRate)
     
 
-    def get_documentation(self):
+    def parse_code_documentation(self):
+        """
+        parse_code_documentation 
+
+        Generate class variables self.documentation and self.documented containing the first set of 
+        comments in the SAS program. 
+
+        self.documentation: str 
+            The first parsed comments.
+
+        self.documented: bool
+            True if the first object parsed in the SAS code is a comment. 
+
+        """
         cmnts = []
         for obj in self.contents:
             if type(obj).__name__ == 'comment':
