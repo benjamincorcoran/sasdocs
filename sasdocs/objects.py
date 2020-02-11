@@ -276,13 +276,13 @@ class include(baseSASObject):
         None
         """
         try:
-            path = pathlib.Path(value).resolve(strict=True)
+            self.path = pathlib.Path(value).resolve(strict=True)
+            self.resolved = True
         except Exception as e:
-            path = pathlib.Path(value)
+            self.path = pathlib.Path(value)
+            self.resolved = False
             log.warning("Unable to directly resolve path: {}".format(e))
-        
-        self.path = path
-        
+
 
 
 @attr.s
@@ -501,10 +501,8 @@ class libname(baseSASObject):
         Hardcoded path pointing to library on disk
     pointer : str, optional
         Libname reference if current libname is pointing to an already established library
-    is_path : bool
-        Indicate whether the libname points to a specific path 
-    is_pointer : bool 
-        Indicate whether the libname points to another library
+    type: str
+        Define whether the libname statement is an explicit path or a pointer
     uri : string
         URL safe version of the path variable
     """
@@ -512,8 +510,6 @@ class libname(baseSASObject):
     path = attr.ib()
     pointer = attr.ib(default=None)
 
-    is_path = False
-    is_pointer = False
 
     @path.validator
     def check_path_is_valid(self, attribute, value):
@@ -535,25 +531,19 @@ class libname(baseSASObject):
         if self.path is not None:
             self.is_path = True
             try:
-                path = pathlib.Path(value).resolve(strict=True)
-                uri = path.as_uri()
+                self.path = pathlib.Path(value).resolve(strict=True)
+                self.uri = self.path.as_uri()
+                self.resolved = True
             except Exception as e:
-                path = pathlib.Path(value)
-                uri = pathlib.Path(value)
+                self.path = pathlib.Path(value)
+                self.uri = pathlib.Path(value)
+                self.resolved = False
                 log.warning("Unable to directly resolve path: {}".format(e))
         else:
-            path = None
-            uri = ''
-
-        self.path = path
-        self.uri = uri
-    
-    def __attrs_post_init__(self):
-        if self.path is None and self.pointer is not None:
-            self.is_pointer = True
+            self.path = None
+            self.uri = ''
         
-
-
+      
 
     def __attrs_post_init__(self):
         if self.path is None and self.pointer is not None:
