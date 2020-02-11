@@ -20,7 +20,7 @@
 ## Libraries
 | Library | Path | Line | 
 | --- | --- | --- |
-{% for library in program.get_objects(objectType='libname') %}| {{library.name}} | [{{library.path}}]({{library.path}}) | {{library.start[0]}} |
+{% for library in program.get_objects(objectType='libname') %}| {{library.name}} | {% if library.type == 'path' %} {% if library.resolved %}`[{{library.path}}]({{library.uri}})` {% else %} `{{library.path}}` {% endif %} {% else %} `{{library.pointer}}` {% endif %} | {{library.start[0]}} |
 {% endfor %}
 {% endif %}
 
@@ -28,7 +28,7 @@
 ## Includes
 | Path | Line | 
 | --- | --- | 
-{% for include in program.get_objects(objectType='include') %}| [{{include.path}}]({{include.uri}}) | {{include.start[0]}} | 
+{% for include in program.get_objects(objectType='include') %}| {% if include.resolved %}`[{{include.path}}]({{include.uri}})` {% else %} `{{include.path}}` {% endif %} | {{include.start[0]}} | 
 {% endfor %}
 {% endif %}
 
@@ -59,7 +59,7 @@ $(document).ready(function(){
 <script>
 $(document).ready(function(){
     var textArea = $("#cma{{program.name.replace(' ','')}}");
-    textArea.val(`{{program.raw}}`);	
+    textArea.val(String.raw`{{program.raw}}`);	
 	var cmConfig = {mode:"sas",lineNumbers:true,readOnly:true,gutter:true,lineWrapping:true,autoRefresh: true};
     var codeMirror = CodeMirror.fromTextArea(document.getElementById("cma{{program.name.replace(' ','')}}"), cmConfig);
 });
