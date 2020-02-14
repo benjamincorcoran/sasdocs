@@ -186,8 +186,8 @@ program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
-    default = (eq + opspc >> (ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+')|mcv).many()).optional(),
-    doc = cmnt.optional()
+    default = (eq + opspc >> (ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+')|mcv).many()).optional() << opspc,
+    doc = opspc >> cmnt.optional()
 ).combine_dict(objects.macroargument)
 
 mcroargline = lb + opspc >> mcroarg.sep_by(opspc+cmm+opspc) << opspc + rb
