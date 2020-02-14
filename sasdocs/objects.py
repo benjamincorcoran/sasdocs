@@ -357,16 +357,16 @@ class dataObject(baseSASObject):
             self.library = 'work'
         
         if type(self.library) == list:
-            _lib = ''.join([s if type(s) != macroVariable else s.variable for s in self.library])
+            self._lib = ''.join([s if type(s) != macroVariable else s.variable for s in self.library])
         else:
-            _lib = self.library
+            self._lib = self.library
         
         if type(self.dataset) == list:
-            _ds = ''.join([s if type(s) != macroVariable else s.variable for s in self.dataset])
+            self._ds = ''.join([s if type(s) != macroVariable else s.variable for s in self.dataset])
         else:
-            _ds = self.dataset
+            self._ds = self.dataset
 
-        self.name = (_lib + '.' + _ds)
+        self.name = (self._lib + '.' + self._ds)
         self.UID = self.name.upper()
         
     def __repr__(self):
@@ -551,7 +551,7 @@ class libname(baseSASObject):
         elif self.path is not None and self.pointer is None:
             self.type = 'path'
         
-        self.name = ''.join(self.library)
+        self.name = ''.join([s if type(s) != macroVariable else s.variable for s in self.library])
 
 
 @attr.s
