@@ -618,6 +618,15 @@ class macroargument(baseSASObject):
     default = attr.ib()
     doc = attr.ib()
 
+    def __attrs_post_init__(self):
+        if self.arg is not None:
+            self._arg = ''.join(self.arg)
+        if self.default is not None:
+            self._default = ''.join(self.default)
+        
+        if isinstance(self.doc, comment):
+            self._doc = self.doc.text
+
 @attr.s
 class macro(baseSASObject):
     """
