@@ -620,9 +620,9 @@ class macroargument(baseSASObject):
 
     def __attrs_post_init__(self):
         if self.arg is not None:
-            self._arg = ''.join(self.arg)
+            self._arg = ''.join([s if type(s) != macroVariable else s.variable for s in self.arg])
         if self.default is not None:
-            self._default = ''.join(self.default)
+            self._default = ''.join([s if type(s) != macroVariable else s.variable for s in self.default])
         
         if isinstance(self.doc, comment):
             self._doc = self.doc.text
