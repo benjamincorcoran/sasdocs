@@ -39,6 +39,27 @@ class SASDirective(SphinxDirective):
                 self.state_machine.insert_input(documentation.split('\n'), '')
             return []
 
+class SASMacroDirective(SphinxDirective):
+    
+    has_content = True
+    required_arguments = 1
+    optional_arguments = 0
+    final_argument_whitespace = False
+
+    def run(self):
+        sasfile = self.arguments[0]
+        srcpath = os.path.normpath(os.path.join(self.env.srcdir,sasfile))
+
+        if os.path.splitext(sasfile)[1].lower() == '.sas':
+            parsedSAS = m2r.convert(sasProgram(srcpath).generate_documentation(template='macro.md'))
+            self.state_machine.insert_input(parsedSAS.split('\n'), '')
+            return []
+        else:
+            parsedSAS = sasProject(srcpath)
+            documentation = m2r.convert(parsedSAS.generate_documentation(macroOnly=True)['macros'])
+            self.state_machine.insert_input(documentation.split('\n'), '')
+            return []
+
 
 
 class SASParser(rst.Parser):
@@ -54,6 +75,7 @@ def setup(app):
     app.add_source_suffix('.sas','sas_program')
     app.add_source_parser(SASParser)
     app.add_directive('sasinclude', SASDirective)
+    app.add_directive('sasmacroinclude', SASMacroDirective)
 
 
     jsfiles = ['d3.v5.js', 'network.js', 'codemirror.js', 'codemirrorSAS.js']

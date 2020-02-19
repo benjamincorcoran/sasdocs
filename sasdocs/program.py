@@ -253,7 +253,7 @@ class sasProgram(object):
             self.documentation = '\n'.join([comment.text for comment in cmnts])
             self.documented = True
     
-    def generate_documentation(self):
+    def generate_documentation(self, template='program.md'):
         """
         generate_documentation
 
@@ -266,7 +266,7 @@ class sasProgram(object):
 
         """
 
-        template = jinja2.Template(pkg_resources.read_text(templates, 'program.md'))
+        template = jinja2.Template(pkg_resources.read_text(templates, template))
         return template.render(program=self)
 
 

@@ -206,36 +206,21 @@ class sasProject(object):
         self.objects = dict(prgSum)
         self.buildTime = "{:%Y-%m-%d %H:%M}".format(datetime.datetime.now())
         
-    def generate_documentation(self, outputDirectory=None):
+    def generate_documentation(self, macroOnly=False):
         """
         generate_documentation(outputDirectory=None)
 
         Generate documentation for the project using the jinja2 templates
 
         """
-        self.add_addtional_documentation_to_project()
+        documentation = {}
+        if not macroOnly:
+            for program in self.programs:
+                documentation[program.name] = program.generate_documentation()
+        
+        template = jinja2.Template(pkg_resources.read_text(templates, 'macro.md'))
+        documentation['macros']=template.render(program=self)
 
-        mdFiles = dict(
-            index = pkg_resources.read_text(templates, 'index.md'),
-            macroIndex = pkg_resources.read_text(templates, 'macroIndex.md'),
-        )
-
-        mdFiles = {k:jinja2.Template(t) for k,t in mdFiles.items()}
-
-        self.documentation['project']  = {
-            'index': mdFiles['index'].render(project=self),
-            'macroIndex' : mdFiles['macroIndex'].render(project=self)
-        }
-
-        self.documentation['programs']  = {program.path: program.generate_documentation() for program in self.programs}
-
-        if outputDirectory is not None:
-            out = pathlib.Path(outputDirectory)
-            if not out.is_dir():
-                out.mkdir()
-            
-            for page, render in self.documentation['project'].items():
-                out.joinpath(page+'.md').write_text(render)
-            
-            for page, render in self.documentation['programs'].items():
-                out.joinpath(page.stem+'.md').write_text(render)
+        return documentation
+        
+        
