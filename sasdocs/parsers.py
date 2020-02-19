@@ -17,6 +17,9 @@ wrd = ps.regex(r'[a-zA-Z0-9_\-]+')
 # FilePath: String terminating in a quote (used only for include and libname)
 fpth = ps.regex(r'[^\'"]+')
 
+# QuotedString:
+qstr = ps.regex(r'[^\'"]*')
+
 # Whitespace and Optional whitespace
 spc = ps.regex(r'\s+')
 opspc = ps.regex(r'\s*')
@@ -186,7 +189,7 @@ program = (nl|mcvDef|cmnt|datastep|proc|lbnm|icld).many()
 
 mcroarg = ps.seq(
     arg = sasName << opspc,
-    default = (eq + opspc >> (ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+')|mcv).many()).optional() << opspc,
+    default = (eq + opspc >> (ps.regex(r'(?:[a-zA-Z0-9_\-@\.\:]|\/(?!\*)|\\(?!\*))+')|mcv|(qte+qstr+qte)).many()).optional() << opspc,
     doc = opspc >> cmnt.optional()
 ).combine_dict(objects.macroargument)
 

@@ -191,6 +191,9 @@ testcases = [
     ('%macro test (a=1/*Doc A*/,b/*Doc B*/); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=['1'],doc=comment(text="Doc A")), macroargument(arg=['b'],default=None,doc=comment(text="Doc B"))], contents='')),
     ('%macro test; data a; set b; run; %mend;', macro(ref=['test'], arguments=None, contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),                                                                    
     ('%macro test(a=1/*Doc A*/,b/*Doc B*/); data a; set b; run; %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'], default=['1'], doc=comment(text='Doc A')), macroargument(arg=['b'], default=None, doc=comment(text='Doc B'))], contents=[dataStep(outputs=[dataObject(library=None, dataset=['a'], options=None)], header=' ', inputs=[dataObject(library=None, dataset=['b'], options=None)], body=' ')])),
+    ('%macro test(a=""); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=['""'],doc=None)], contents='')),
+    ('%macro test(a=""/*Doc A*/); %mend;', macro(ref=['test'], arguments=[macroargument(arg=['a'],default=['""'],doc=comment(text='Doc A'))], contents='')),
+     
 ]
 
 @pytest.mark.parametrize("case,expected", testcases)
