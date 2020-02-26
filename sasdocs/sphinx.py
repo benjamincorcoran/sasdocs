@@ -78,18 +78,30 @@ def setup(app):
     app.add_directive('sasmacroinclude', SASMacroDirective)
 
 
-    jsfiles = ['d3.v5.js', 'network.js', 'codemirror.js', 'codemirrorSAS.js']
-    cssfiles = ['networkStyle.css', 'codemirrorStyle.css']
+    jsfilesCDN = [r'https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js',  
+                  r'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/codemirror.min.js', 
+                  r'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/mode/sas/sas.min.js']
 
-    for js in jsfiles:
+    cssFilesCDN = [r'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/codemirror.min.css']
+
+    jsFiles = ['network.js']
+    cssFiles = ['networkStyle.css']
+
+    for js in jsFiles:
         with pkg_resources.path(sphinxStatic, js) as p:
             copyfile(str(p), os.path.join(app.srcdir, '_static', js))
             app.add_js_file(js)
 
-    for css in cssfiles:
+    for css in cssFiles:
         with pkg_resources.path(sphinxStatic, css) as p:
             copyfile(str(p), os.path.join(app.srcdir, '_static', css))
             app.add_css_file(css)
+    
+    for js in jsfilesCDN:
+        app.add_js_file(js)
+
+    for css in cssFilesCDN:
+        app.add_css_file(css)
 
 
     return {
