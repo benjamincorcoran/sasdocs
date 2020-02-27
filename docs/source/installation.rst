@@ -1,7 +1,7 @@
 Installation
 ============
 
-sasdocs can be installed by cloning this reposistory:
+`sasdocs` can be installed by cloning this reposistory:
 
 .. code-block:: bash
 
