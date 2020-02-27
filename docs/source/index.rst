@@ -1,5 +1,4 @@
-sasdocs
-=======
+.. mdinclude:: ../../README.md
 
 .. toctree::
    :maxdepth: 2
@@ -10,10 +9,3 @@ sasdocs
    sphinx
    objects
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

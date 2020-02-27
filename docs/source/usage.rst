@@ -2,14 +2,14 @@ Usage
 ======
 
 The sasdocs module exists as a series of parsers and abstracted SAS programming language objects. 
-These objects aim to be fairly intutitive in their purpose. 
+These objects aim to be fairly intuitive in their purpose. 
 
 SASProgram vs SASProject
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 In adddition to the parsers there are two objects that exists to represent the usage of SAS software
 outside of the programming language. These are the SASProgram and SASProject objects. These two objects 
-are very similar in strucutre and usage. 
+are very similar in structure and usage. 
 
 The SASProgram object represents as single `.sas` file, capturing any code and parsing it into the SASProgam's 
 `contents` attribute. The SASProgam also contains meta information about the file it has parsed.
@@ -75,8 +75,8 @@ Each item in the `prj.programs` list is a instance of the `sasProgram` object
 
 Please refer to the object index :doc:`objects` to see all available objects and attributes. 
 
-get_objects() function
-^^^^^^^^^^^^^^^^^^^^^^
+`get_objects()`
+^^^^^^^^^^^^^^^
 
 Both the sasProject and sasProgram class have a `get_objects` function attached. This 
 will loop over the associated object and yield each parsed object found.
@@ -109,7 +109,6 @@ will produce an output of
     dataStep(outputs=[work.test1], inputs=[work.test])                "<class 'sasdocs.objects.dataStep'>"
     procedure(outputs=[work.test2], inputs=[work.test1], type='sort') "<class 'sasdocs.objects.procedure'>"
 
-
 The get_objects function also takes the optional `objectType` keyword to specify only a single object type
 be returned, the below example
 
@@ -117,7 +116,6 @@ be returned, the below example
 
     for obj in prj.get_objects(objectType="include"):
         print(obj, type(obj))
-
 
 produces the following 
 
@@ -133,3 +131,4 @@ all the macros stored in your project use
 
     prj.get_objects(objectType="macro")
     
+
