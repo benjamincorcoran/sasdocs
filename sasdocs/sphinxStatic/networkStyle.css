@@ -39,3 +39,12 @@ div.tooltip {
     border-radius: 8px;			
     pointer-events: none;			
 }
+
+.CodeMirror {
+	/* Set height, width, borders, and global font properties here */
+	font-family: monospace;
+	font-size: 11px;
+	height: 300px;
+	color: black;
+	direction: ltr;
+  }
