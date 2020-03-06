@@ -81,14 +81,14 @@ mcvDef = ps.seq(
 # e.g. where=(1=1)
 datalineArg = ps.seq(
     option = sasName << (opspc + eq + opspc), 
-    setting = lb + ps.regex(r'[^)]*',flags=reFlags) + rb
+    setting = lb + ps.regex(r'[^);]*',flags=reFlags) + rb
 ).combine_dict(objects.dataArg)
 
 # datalineArg: Argument in dataline sasName = sasName sasName sasName...
 # e.g. keep=A B C 
 datalineArgNB = ps.seq(
     option = sasName << (opspc + eq + opspc), 
-    setting = ps.regex(r'.*?(?=\s+\w+\s*=)|.*?(?=\))|.*?(?=;)')
+    setting = ps.regex(r'[^;]*?(?=\s+\w+\s*=)|[^\);]*?(?=\))|.*?(?=;)', flags=reFlags)
 ).combine_dict(objects.dataArg)
 
 datalineArgPt = ps.seq(
@@ -97,7 +97,7 @@ datalineArgPt = ps.seq(
 ).combine_dict(objects.dataArg)
 
 # datalineOptions: Seperate multiple datalineArgs by spaces
-datalineOptions = lb >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc) << rb
+datalineOptions = lb + opspc >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc) << opspc + rb
 
 
 # dataObj: Abstracted data object exists as three components:
@@ -108,7 +108,7 @@ datalineOptions = lb >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by
 dataObj = ps.seq(
     library = (sasName << dot).optional(),
     dataset = (dot >> sasName) | sasName,
-    options = datalineOptions.optional()
+    options = (opspc >> datalineOptions).optional()
 ).combine_dict(objects.dataObject)
 
 # dataLine: Multiple dataObjs seperated by space
@@ -126,7 +126,7 @@ datastep = ps.seq(
     options = (opspc + fs + opspc >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc)).optional(), 
     _col = opspc + col,
     header = (ps.regex(r'(?:(?!run).)*(?=set|merge)', flags=reFlags)).optional(),
-    inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << col).optional(),
+    inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << opspc + col).optional(),
     body = ps.regex(r'.*?(?=run)', flags=reFlags),
     _run = run + opspc + col
 ).combine_dict(objects.dataStep)
