@@ -122,12 +122,12 @@ dataLine = dataObj.sep_by(spc)
 # terminating run is thrown away
 
 datastep = ps.seq(
-    outputs = (ps.regex(r'data', flags=re.IGNORECASE) + spc) >> dataLine,
+    outputs = (ps.regex(r'\bdata\b', flags=re.IGNORECASE) + spc) >> dataLine,
     options = (opspc + fs + opspc >> (datalineArg|datalineArgPt|datalineArgNB|sasName).sep_by(spc)).optional(), 
     _col = opspc + col,
     header = (ps.regex(r'(?:(?!run).)*(?=\bset\b|\bmerge\b)', flags=reFlags)).optional(),
-    inputs = ((opspc + ps.regex(r'set|merge',flags=re.IGNORECASE) + opspc) >> dataLine << opspc + col).optional(),
-    body = ps.regex(r'.*?(?=run)', flags=reFlags),
+    inputs = ((opspc + ps.regex(r'\bset\b|\bmerge\b',flags=re.IGNORECASE) + opspc) >> dataLine << opspc + col).optional(),
+    body = ps.regex(r'.*?(?=\brun\b)', flags=reFlags),
     _run = run + opspc + col
 ).combine_dict(objects.dataStep)
 
