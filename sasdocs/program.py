@@ -158,11 +158,11 @@ class sasProgram(object):
 
                 for input in obj.inputs:
                     if self.networkGraph.has_node(input.UID) is False:
-                        self.networkGraph.add_node(input.UID, library=input.library, dataset=input.dataset, line=obj.start[0])
+                        self.networkGraph.add_node(input.UID, library=input._lib, dataset=input._ds, line=obj.start[0])
                     
                     for output in obj.outputs:
                         if self.networkGraph.has_node(output.UID) is False:
-                            self.networkGraph.add_node(output.UID, library=output.library, dataset=output.dataset, line=obj.start[0])
+                            self.networkGraph.add_node(output.UID, library=output._lib, dataset=output._ds, line=obj.start[0])
                         
                         if input.UID != output.UID:
                             if hasattr(obj,'type'):
