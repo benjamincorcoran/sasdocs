@@ -185,6 +185,9 @@ class macroVariable(baseSASObject):
     """
     variable = attr.ib()
 
+    def __str__(self):
+        return self.variable
+
 @attr.s
 class comment(baseSASObject):
     """
@@ -359,12 +362,12 @@ class dataObject(baseSASObject):
         if type(self.library) == list:
             self._lib = ''.join([s if type(s) != macroVariable else s.variable for s in self.library])
         else:
-            self._lib = self.library
+            self._lib = str(self.library)
         
         if type(self.dataset) == list:
             self._ds = ''.join([s if type(s) != macroVariable else s.variable for s in self.dataset])
         else:
-            self._ds = self.dataset
+            self._ds = str(self.dataset)
 
         self.name = (self._lib + '.' + self._ds)
         self.UID = self.name.upper()
